@@ -3,16 +3,16 @@
 import { useState } from "react";
 import {
   Box,
-  Textarea,
   Input,
-  Button,
-  Heading,
+  Textarea,
   Select,
   NumberInput,
   NumberInputField,
   VStack,
   HStack,
   FormLabel,
+  Button,
+  Heading,
 } from "@chakra-ui/react";
 
 export default function ToolUI({ title, fields = [], promptTemplate }) {
@@ -22,9 +22,7 @@ export default function ToolUI({ title, fields = [], promptTemplate }) {
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (name, value) => {
-    setValues({ ...values, [name]: value });
-  };
+  const handleChange = (name, value) => setValues({ ...values, [name]: value });
 
   const generate = async () => {
     let prompt = promptTemplate;
@@ -40,50 +38,48 @@ export default function ToolUI({ title, fields = [], promptTemplate }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt }),
     });
+
     const data = await res.json();
     setOutput(data.result || "Error generating response");
     setLoading(false);
   };
 
   return (
-    <Box maxW="4xl" mx="auto" bg="white" p={8} borderRadius="2xl" boxShadow="xl">
+    <Box maxW="4xl" mx="auto" p={8} bg="white" borderRadius="2xl" boxShadow="2xl">
       <Heading size="lg" mb={6}>{title}</Heading>
 
       <VStack spacing={4} align="stretch" mb={6}>
-        {fields.map((field) => (
-          <Box key={field.name}>
-            <FormLabel>{field.label}</FormLabel>
-            {field.type === "text" && (
+        {fields.map((f) => (
+          <Box key={f.name}>
+            <FormLabel>{f.label}</FormLabel>
+            {f.type === "text" && (
               <Input
-                placeholder={field.placeholder}
-                value={values[field.name]}
-                onChange={(e) => handleChange(field.name, e.target.value)}
+                placeholder={f.placeholder}
+                value={values[f.name]}
+                onChange={(e) => handleChange(f.name, e.target.value)}
               />
             )}
-            {field.type === "textarea" && (
+            {f.type === "textarea" && (
               <Textarea
-                placeholder={field.placeholder}
-                value={values[field.name]}
-                onChange={(e) => handleChange(field.name, e.target.value)}
+                placeholder={f.placeholder}
+                value={values[f.name]}
+                onChange={(e) => handleChange(f.name, e.target.value)}
                 rows={4}
               />
             )}
-            {field.type === "select" && (
-              <Select
-                value={values[field.name]}
-                onChange={(e) => handleChange(field.name, e.target.value)}
-              >
-                {field.options.map((opt) => (
-                  <option key={opt} value={opt}>{opt}</option>
+            {f.type === "select" && (
+              <Select value={values[f.name]} onChange={(e) => handleChange(f.name, e.target.value)}>
+                {f.options.map((o) => (
+                  <option key={o} value={o}>{o}</option>
                 ))}
               </Select>
             )}
-            {field.type === "number" && (
+            {f.type === "number" && (
               <NumberInput
-                value={values[field.name]}
-                min={field.min}
-                max={field.max}
-                onChange={(val) => handleChange(field.name, val)}
+                value={values[f.name]}
+                min={f.min}
+                max={f.max}
+                onChange={(val) => handleChange(f.name, val)}
               >
                 <NumberInputField />
               </NumberInput>
