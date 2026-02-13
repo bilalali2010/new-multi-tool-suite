@@ -2,94 +2,97 @@
 
 import { useState } from "react";
 import ToolUI from "./components/ToolUI";
-import { Box, VStack, Button, Heading } from "@chakra-ui/react";
+import { Box, VStack, Button, Heading, Text } from "@chakra-ui/react";
 
-// All tools with dynamic options and placeholders
+// Tools with custom labels and prompts
 const tools = {
-  chatbot: {
-    title: "🤖 AI Chatbot",
-    prompt: "{{input}}",
-    options: [
-      { type: "select", name: "length", options: ["Short", "Medium", "Long"], default: "Medium" },
-    ],
-  },
   logo: {
     title: "🎨 Logo Prompt Generator",
-    prompt: "Create a professional logo prompt for {{input}}",
-    options: [
-      { type: "select", name: "style", options: ["Minimal", "Modern", "Vintage"], default: "Minimal" },
+    fields: [
+      { label: "🏷 Brand Name", name: "brandName", type: "text", placeholder: "Enter brand name" },
+      { label: "🎯 Brand Niche", name: "brandNiche", type: "text", placeholder: "Enter brand niche" },
     ],
+    promptTemplate: "Create a professional logo prompt for {{brandName}} in the niche of {{brandNiche}}",
   },
   rewriter: {
     title: "✍️ Text Rewriter",
-    prompt: "Rewrite professionally:\n{{input}}",
-    options: [
-      { type: "select", name: "tone", options: ["Formal", "Casual", "Persuasive"], default: "Formal" },
+    fields: [
+      { label: "📄 Original Text", name: "text", type: "textarea", placeholder: "Enter text to rewrite" },
+      { label: "🎨 Rewrite Style", name: "style", type: "select", options: ["Simple", "Professional", "Creative"], default: "Simple" },
     ],
+    promptTemplate: "Rewrite the following text in a {{style}} style:\n{{text}}",
   },
   meme: {
     title: "🤣 Meme Idea Generator",
-    prompt: "Give {{count}} meme ideas about {{input}}",
-    options: [
-      { type: "number", name: "count", min: 1, max: 10, default: 5 },
+    fields: [
+      { label: "🔥 Topic", name: "topic", type: "text", placeholder: "Enter meme topic" },
+      { label: "📝 Number of Ideas", name: "count", type: "number", min: 1, max: 10, default: 5 },
     ],
+    promptTemplate: "Generate {{count}} meme ideas about {{topic}}",
   },
   blog: {
-    title: "📝 Blog Generator",
-    prompt: "Write a detailed blog ({{length}}) with headings about {{input}}",
-    options: [
-      { type: "select", name: "length", options: ["Short", "Medium", "Long"], default: "Medium" },
+    title: "📝 AI Blog Generator",
+    fields: [
+      { label: "🧠 Blog Topic", name: "topic", type: "text", placeholder: "Enter blog topic" },
+      { label: "📏 Length", name: "length", type: "select", options: ["Short", "Medium", "Long"], default: "Medium" },
     ],
+    promptTemplate: "Write a detailed {{length}} blog with headings about {{topic}}",
   },
   news: {
     title: "📰 News Article Writer",
-    prompt: "Write a news article ({{length}}) about {{input}}",
-    options: [
-      { type: "select", name: "length", options: ["Short", "Medium", "Long"], default: "Medium" },
+    fields: [
+      { label: "🗞 Headline", name: "headline", type: "text", placeholder: "Enter headline" },
+      { label: "📏 Length", name: "length", type: "select", options: ["Short", "Medium", "Long"], default: "Medium" },
     ],
+    promptTemplate: "Write a news article ({{length}}) about {{headline}}",
   },
   story: {
     title: "📖 Story Writer",
-    prompt: "Write a creative story ({{length}}) based on {{input}}",
-    options: [
-      { type: "select", name: "length", options: ["Short", "Medium", "Long"], default: "Medium" },
-      { type: "select", name: "genre", options: ["Fantasy", "Sci-Fi", "Drama", "Comedy"], default: "Fantasy" },
+    fields: [
+      { label: "🌱 Story Idea", name: "idea", type: "text", placeholder: "Enter story idea" },
+      { label: "Genre", name: "genre", type: "select", options: ["Fantasy", "Sci-Fi", "Drama", "Comedy"], default: "Fantasy" },
+      { label: "📏 Length", name: "length", type: "select", options: ["Short", "Medium", "Long"], default: "Medium" },
     ],
+    promptTemplate: "Write a {{length}} {{genre}} story based on the idea: {{idea}}",
   },
   caption: {
-    title: "📱 Caption Writer",
-    prompt: "Generate social media captions ({{tone}}) for {{input}}",
-    options: [
-      { type: "select", name: "tone", options: ["Funny", "Inspirational", "Professional"], default: "Funny" },
-      { type: "number", name: "count", min: 1, max: 5, default: 3 },
+    title: "📱 Social Media Caption Writer",
+    fields: [
+      { label: "📸 Post Description", name: "description", type: "text", placeholder: "Enter post description" },
+      { label: "Tone", name: "tone", type: "select", options: ["Funny", "Inspirational", "Professional"], default: "Funny" },
+      { label: "Number of Captions", name: "count", type: "number", min: 1, max: 5, default: 3 },
     ],
+    promptTemplate: "Generate {{count}} social media captions in a {{tone}} tone for: {{description}}",
   },
   seo: {
     title: "🔍 SEO Keyword Generator",
-    prompt: "Generate SEO keywords for {{input}}",
-    options: [
-      { type: "number", name: "count", min: 1, max: 20, default: 10 },
+    fields: [
+      { label: "🌐 Topic", name: "topic", type: "text", placeholder: "Enter topic" },
+      { label: "Number of Keywords", name: "count", type: "number", min: 1, max: 20, default: 10 },
     ],
+    promptTemplate: "Generate {{count}} SEO keywords for {{topic}}",
   },
   email: {
-    title: "📧 Email Writer",
-    prompt: "Write a professional email ({{tone}}) about {{input}}",
-    options: [
-      { type: "select", name: "tone", options: ["Formal", "Casual", "Persuasive"], default: "Formal" },
+    title: "📧 AI Email Writer",
+    fields: [
+      { label: "📬 Email Purpose", name: "purpose", type: "text", placeholder: "Enter purpose" },
+      { label: "Tone", name: "tone", type: "select", options: ["Formal", "Casual", "Persuasive"], default: "Formal" },
     ],
+    promptTemplate: "Write a professional email ({{tone}}) about: {{purpose}}",
   },
 };
 
 export default function Home() {
-  const [selectedTool, setSelectedTool] = useState("chatbot");
+  const [selectedTool, setSelectedTool] = useState("logo");
 
   return (
     <Box display="flex" h="100vh" bg="gray.100">
       {/* Sidebar */}
       <VStack w="72" bg="white" p={6} spacing={2} align="stretch" boxShadow="lg">
         <Heading size="md" mb={8} bgGradient="linear(to-r, teal.500, green.500)" bgClip="text">
-          AI Multi-Tool
+          ✨ AI Multi-Tool Suite
         </Heading>
+        <Text mb={4}>🧰 Choose a Tool</Text>
 
         {Object.keys(tools).map((key) => (
           <Button
@@ -103,12 +106,12 @@ export default function Home() {
         ))}
       </VStack>
 
-      {/* Main */}
+      {/* Main Panel */}
       <Box flex="1" p={10} overflowY="auto">
         <ToolUI
           title={tools[selectedTool].title}
-          promptTemplate={tools[selectedTool].prompt}
-          options={tools[selectedTool].options}
+          fields={tools[selectedTool].fields}
+          promptTemplate={tools[selectedTool].promptTemplate}
         />
       </Box>
     </Box>
