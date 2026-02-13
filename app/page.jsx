@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import ToolUI from "./components/ToolUI";
-import { Box, VStack, Button, Heading, Text } from "@chakra-ui/react";
+import { Box, VStack, Button, Heading, Text, Flex } from "@chakra-ui/react";
 
-// Tools with custom labels and prompts
+// Tools with custom inputs and prompts
 const tools = {
   logo: {
     title: "🎨 Logo Prompt Generator",
@@ -86,13 +86,21 @@ export default function Home() {
   const [selectedTool, setSelectedTool] = useState("logo");
 
   return (
-    <Box display="flex" h="100vh" bg="gray.100">
+    <Flex h="100vh" bg="gray.100">
       {/* Sidebar */}
-      <VStack w="72" bg="white" p={6} spacing={2} align="stretch" boxShadow="lg">
-        <Heading size="md" mb={8} bgGradient="linear(to-r, teal.500, green.500)" bgClip="text">
+      <VStack
+        w="80"
+        bg="white"
+        p={6}
+        spacing={3}
+        align="stretch"
+        boxShadow="xl"
+        overflowY="auto"
+      >
+        <Heading size="lg" mb={6} bgGradient="linear(to-r, teal.500, green.500)" bgClip="text">
           ✨ AI Multi-Tool Suite
         </Heading>
-        <Text mb={4}>🧰 Choose a Tool</Text>
+        <Text fontSize="sm" mb={4}>🧰 Choose a Tool</Text>
 
         {Object.keys(tools).map((key) => (
           <Button
@@ -100,13 +108,15 @@ export default function Home() {
             onClick={() => setSelectedTool(key)}
             variant={selectedTool === key ? "solid" : "ghost"}
             colorScheme={selectedTool === key ? "teal" : "gray"}
+            _hover={{ bg: "teal.200" }}
+            justifyContent="flex-start"
           >
             {tools[key].title}
           </Button>
         ))}
       </VStack>
 
-      {/* Main Panel */}
+      {/* Main Content */}
       <Box flex="1" p={10} overflowY="auto">
         <ToolUI
           title={tools[selectedTool].title}
@@ -114,6 +124,6 @@ export default function Home() {
           promptTemplate={tools[selectedTool].promptTemplate}
         />
       </Box>
-    </Box>
+    </Flex>
   );
 }
