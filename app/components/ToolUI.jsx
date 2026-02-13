@@ -25,7 +25,6 @@ import {
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 
 export default function ToolUI({ title, fields = [], promptTemplate }) {
-  // Initialize field values
   const [values, setValues] = useState(
     fields.reduce((acc, f) => ({ ...acc, [f.name]: f.default || "" }), {})
   );
@@ -33,10 +32,8 @@ export default function ToolUI({ title, fields = [], promptTemplate }) {
   const [loading, setLoading] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
 
-  // Update field values
   const handleChange = (name, value) => setValues({ ...values, [name]: value });
 
-  // Generate AI response
   const generate = async () => {
     let prompt = promptTemplate;
     Object.keys(values).forEach((key) => {
@@ -52,7 +49,6 @@ export default function ToolUI({ title, fields = [], promptTemplate }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt }),
       });
-
       const data = await res.json();
       setOutput(data.result || "Error generating response");
     } catch (err) {
@@ -63,7 +59,7 @@ export default function ToolUI({ title, fields = [], promptTemplate }) {
   };
 
   return (
-    <Box maxW="5xl" mx="auto" p={8} bg="white" borderRadius="2xl" boxShadow="2xl">
+    <Box maxW="5xl" mx="auto" p={6} bg="white" borderRadius="2xl" boxShadow="2xl">
       {/* Header */}
       <HStack justify="space-between" mb={4}>
         <Heading size="lg">{title}</Heading>
@@ -78,7 +74,7 @@ export default function ToolUI({ title, fields = [], promptTemplate }) {
       {/* Collapsible Input Panel */}
       <Collapse in={!collapsed} animateOpacity>
         <Tabs variant="enclosed-colored" colorScheme="teal">
-          <TabList mb="1em">
+          <TabList mb={2}>
             <Tab>Inputs</Tab>
             {fields.some((f) => f.type === "select") && <Tab>Options</Tab>}
           </TabList>
@@ -158,10 +154,7 @@ export default function ToolUI({ title, fields = [], promptTemplate }) {
           Generate
         </Button>
         <Tooltip label="Copy output to clipboard" placement="top">
-          <Button
-            onClick={() => navigator.clipboard.writeText(output)}
-            disabled={!output}
-          >
+          <Button onClick={() => navigator.clipboard.writeText(output)} disabled={!output}>
             Copy Output
           </Button>
         </Tooltip>
