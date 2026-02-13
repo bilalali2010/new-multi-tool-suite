@@ -2,11 +2,21 @@
 
 import { useState } from "react";
 import ToolUI from "./components/ToolUI";
-import { Box, VStack, Button, Heading, Text, Flex } from "@chakra-ui/react";
+import {
+  Box,
+  VStack,
+  HStack,
+  Button,
+  Heading,
+  Text,
+  Flex,
+  IconButton,
+  Tooltip,
+} from "@chakra-ui/react";
+import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
 
-// Complete Tools Object: Original + New Tools
+// Complete Tools Object (same as previous 18 tools)
 const tools = {
-  // Original Tools
   logo: {
     title: "🎨 Logo Prompt Generator",
     fields: [
@@ -81,8 +91,6 @@ const tools = {
     ],
     promptTemplate: "Write a professional email ({{tone}}) about: {{purpose}}",
   },
-
-  // New Tools
   resume: {
     title: "🧩 AI Resume Builder",
     fields: [
@@ -166,35 +174,46 @@ const tools = {
 
 export default function Home() {
   const [selectedTool, setSelectedTool] = useState("logo");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
     <Flex h="100vh" bg="gray.100">
-      {/* Sidebar */}
+      {/* Collapsible Sidebar */}
       <VStack
-        w="80"
+        w={sidebarCollapsed ? "20" : "80"}
         bg="white"
-        p={6}
+        p={4}
         spacing={3}
         align="stretch"
         boxShadow="xl"
         overflowY="auto"
       >
-        <Heading size="lg" mb={6} bgGradient="linear(to-r, teal.500, green.500)" bgClip="text">
-          ✨ AI Multi-Tool Suite
-        </Heading>
-        <Text fontSize="sm" mb={4}>🧰 Choose a Tool</Text>
+        <HStack justifyContent={sidebarCollapsed ? "center" : "space-between"} mb={4}>
+          {!sidebarCollapsed && (
+            <Heading size="md" bgGradient="linear(to-r, teal.500, green.500)" bgClip="text">
+              ✨ AI Multi-Tool
+            </Heading>
+          )}
+          <IconButton
+            icon={sidebarCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            aria-label="Toggle Sidebar"
+            size="sm"
+            variant="ghost"
+          />
+        </HStack>
 
         {Object.keys(tools).map((key) => (
-          <Button
-            key={key}
-            onClick={() => setSelectedTool(key)}
-            variant={selectedTool === key ? "solid" : "ghost"}
-            colorScheme={selectedTool === key ? "teal" : "gray"}
-            _hover={{ bg: "teal.200" }}
-            justifyContent="flex-start"
-          >
-            {tools[key].title}
-          </Button>
+          <Tooltip key={key} label={tools[key].title} placement="right" isDisabled={!sidebarCollapsed}>
+            <Button
+              onClick={() => setSelectedTool(key)}
+              variant={selectedTool === key ? "solid" : "ghost"}
+              colorScheme={selectedTool === key ? "teal" : "gray"}
+              justifyContent={sidebarCollapsed ? "center" : "flex-start"}
+            >
+              {sidebarCollapsed ? tools[key].title.charAt(0) : tools[key].title}
+            </Button>
+          </Tooltip>
         ))}
       </VStack>
 
