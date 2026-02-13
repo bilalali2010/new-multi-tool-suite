@@ -8,14 +8,19 @@ import {
   HStack,
   Button,
   Heading,
-  Text,
   Flex,
   IconButton,
+  Drawer,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
+  DrawerHeader,
+  DrawerBody,
+  useDisclosure,
   Tooltip,
 } from "@chakra-ui/react";
-import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
+import { HamburgerIcon } from "@chakra-ui/icons";
 
-// Complete Tools Object (same as previous 18 tools)
 const tools = {
   logo: {
     title: "🎨 Logo Prompt Generator",
@@ -174,13 +179,14 @@ const tools = {
 
 export default function Home() {
   const [selectedTool, setSelectedTool] = useState("logo");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
     <Flex h="100vh" bg="gray.100">
-      {/* Collapsible Sidebar */}
+      {/* Desktop Sidebar */}
       <VStack
-        w={sidebarCollapsed ? "20" : "80"}
+        display={{ base: "none", md: "flex" }}
+        w="80"
         bg="white"
         p={4}
         spacing={3}
@@ -188,37 +194,61 @@ export default function Home() {
         boxShadow="xl"
         overflowY="auto"
       >
-        <HStack justifyContent={sidebarCollapsed ? "center" : "space-between"} mb={4}>
-          {!sidebarCollapsed && (
-            <Heading size="md" bgGradient="linear(to-r, teal.500, green.500)" bgClip="text">
-              ✨ AI Multi-Tool
-            </Heading>
-          )}
-          <IconButton
-            icon={sidebarCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            aria-label="Toggle Sidebar"
-            size="sm"
-            variant="ghost"
-          />
-        </HStack>
-
+        <Heading size="md" mb={4} bgGradient="linear(to-r, teal.500, green.500)" bgClip="text">
+          ✨ AI Multi-Tool
+        </Heading>
         {Object.keys(tools).map((key) => (
-          <Tooltip key={key} label={tools[key].title} placement="right" isDisabled={!sidebarCollapsed}>
+          <Tooltip key={key} label={tools[key].title} placement="right" isDisabled>
             <Button
               onClick={() => setSelectedTool(key)}
               variant={selectedTool === key ? "solid" : "ghost"}
               colorScheme={selectedTool === key ? "teal" : "gray"}
-              justifyContent={sidebarCollapsed ? "center" : "flex-start"}
+              justifyContent="flex-start"
             >
-              {sidebarCollapsed ? tools[key].title.charAt(0) : tools[key].title}
+              {tools[key].title}
             </Button>
           </Tooltip>
         ))}
       </VStack>
 
+      {/* Mobile Sidebar Drawer */}
+      <Drawer placement="left" onClose={onClose} isOpen={isOpen} size="xs">
+        <DrawerOverlay />
+        <DrawerContent>
+          <DrawerCloseButton />
+          <DrawerHeader>✨ AI Multi-Tool</DrawerHeader>
+          <DrawerBody>
+            <VStack spacing={3} align="stretch">
+              {Object.keys(tools).map((key) => (
+                <Button
+                  key={key}
+                  onClick={() => {
+                    setSelectedTool(key);
+                    onClose();
+                  }}
+                  variant={selectedTool === key ? "solid" : "ghost"}
+                  colorScheme={selectedTool === key ? "teal" : "gray"}
+                >
+                  {tools[key].title}
+                </Button>
+              ))}
+            </VStack>
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
+
       {/* Main Content */}
-      <Box flex="1" p={10} overflowY="auto">
+      <Box flex="1" p={4} overflowY="auto">
+        {/* Mobile Hamburger */}
+        <HStack display={{ base: "flex", md: "none" }} mb={4}>
+          <IconButton
+            icon={<HamburgerIcon />}
+            onClick={onOpen}
+            aria-label="Open menu"
+          />
+          <Heading size="md">{tools[selectedTool].title}</Heading>
+        </HStack>
+
         <ToolUI
           title={tools[selectedTool].title}
           fields={tools[selectedTool].fields}
