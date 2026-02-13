@@ -8,19 +8,12 @@ import {
   HStack,
   Button,
   Heading,
-  Flex,
-  IconButton,
-  Drawer,
-  DrawerOverlay,
-  DrawerContent,
-  DrawerCloseButton,
-  DrawerHeader,
-  DrawerBody,
-  useDisclosure,
-  Tooltip,
+  Select,
+  Stack,
+  Text,
 } from "@chakra-ui/react";
-import { HamburgerIcon } from "@chakra-ui/icons";
 
+// All 18 tools
 const tools = {
   logo: {
     title: "🎨 Logo Prompt Generator",
@@ -179,82 +172,32 @@ const tools = {
 
 export default function Home() {
   const [selectedTool, setSelectedTool] = useState("logo");
-  const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
-    <Flex h="100vh" bg="gray.100">
-      {/* Desktop Sidebar */}
-      <VStack
-        display={{ base: "none", md: "flex" }}
-        w="80"
-        bg="white"
-        p={4}
-        spacing={3}
-        align="stretch"
-        boxShadow="xl"
-        overflowY="auto"
-      >
-        <Heading size="md" mb={4} bgGradient="linear(to-r, teal.500, green.500)" bgClip="text">
-          ✨ AI Multi-Tool
+    <Box p={4} maxW="5xl" mx="auto">
+      {/* Tool Selector */}
+      <VStack spacing={4} mb={6} align="stretch">
+        <Heading size="lg" bgGradient="linear(to-r, teal.500, green.500)" bgClip="text">
+          ✨ AI Multi-Tool Suite
         </Heading>
-        {Object.keys(tools).map((key) => (
-          <Tooltip key={key} label={tools[key].title} placement="right" isDisabled>
-            <Button
-              onClick={() => setSelectedTool(key)}
-              variant={selectedTool === key ? "solid" : "ghost"}
-              colorScheme={selectedTool === key ? "teal" : "gray"}
-              justifyContent="flex-start"
-            >
+        <Select
+          value={selectedTool}
+          onChange={(e) => setSelectedTool(e.target.value)}
+        >
+          {Object.keys(tools).map((key) => (
+            <option key={key} value={key}>
               {tools[key].title}
-            </Button>
-          </Tooltip>
-        ))}
+            </option>
+          ))}
+        </Select>
       </VStack>
 
-      {/* Mobile Sidebar Drawer */}
-      <Drawer placement="left" onClose={onClose} isOpen={isOpen} size="xs">
-        <DrawerOverlay />
-        <DrawerContent>
-          <DrawerCloseButton />
-          <DrawerHeader>✨ AI Multi-Tool</DrawerHeader>
-          <DrawerBody>
-            <VStack spacing={3} align="stretch">
-              {Object.keys(tools).map((key) => (
-                <Button
-                  key={key}
-                  onClick={() => {
-                    setSelectedTool(key);
-                    onClose();
-                  }}
-                  variant={selectedTool === key ? "solid" : "ghost"}
-                  colorScheme={selectedTool === key ? "teal" : "gray"}
-                >
-                  {tools[key].title}
-                </Button>
-              ))}
-            </VStack>
-          </DrawerBody>
-        </DrawerContent>
-      </Drawer>
-
-      {/* Main Content */}
-      <Box flex="1" p={4} overflowY="auto">
-        {/* Mobile Hamburger */}
-        <HStack display={{ base: "flex", md: "none" }} mb={4}>
-          <IconButton
-            icon={<HamburgerIcon />}
-            onClick={onOpen}
-            aria-label="Open menu"
-          />
-          <Heading size="md">{tools[selectedTool].title}</Heading>
-        </HStack>
-
-        <ToolUI
-          title={tools[selectedTool].title}
-          fields={tools[selectedTool].fields}
-          promptTemplate={tools[selectedTool].promptTemplate}
-        />
-      </Box>
-    </Flex>
+      {/* Tool UI */}
+      <ToolUI
+        title={tools[selectedTool].title}
+        fields={tools[selectedTool].fields}
+        promptTemplate={tools[selectedTool].promptTemplate}
+      />
+    </Box>
   );
 }
