@@ -4,8 +4,9 @@ import { useState } from "react";
 import ToolUI from "./components/ToolUI";
 import { Box, VStack, Button, Heading, Text, Flex } from "@chakra-ui/react";
 
-// Tools with custom inputs and prompts
+// Complete Tools Object: Original + New Tools
 const tools = {
+  // Original Tools
   logo: {
     title: "🎨 Logo Prompt Generator",
     fields: [
@@ -79,6 +80,87 @@ const tools = {
       { label: "Tone", name: "tone", type: "select", options: ["Formal", "Casual", "Persuasive"], default: "Formal" },
     ],
     promptTemplate: "Write a professional email ({{tone}}) about: {{purpose}}",
+  },
+
+  // New Tools
+  resume: {
+    title: "🧩 AI Resume Builder",
+    fields: [
+      { label: "Full Name", name: "fullName", type: "text" },
+      { label: "Job Title", name: "jobTitle", type: "text" },
+      { label: "Skills", name: "skills", type: "text", placeholder: "Comma separated" },
+      { label: "Experience Summary", name: "experience", type: "textarea", placeholder: "Enter your experience" },
+    ],
+    promptTemplate: "Create a professional resume for {{fullName}}, applying for {{jobTitle}} with skills {{skills}} and experience: {{experience}}",
+  },
+  adcopy: {
+    title: "🎯 AI Marketing Ad Copy",
+    fields: [
+      { label: "Product/Service Name", name: "productName", type: "text" },
+      { label: "Target Audience", name: "audience", type: "text" },
+      { label: "Tone", name: "tone", type: "select", options: ["Friendly", "Persuasive", "Formal"], default: "Friendly" },
+    ],
+    promptTemplate: "Write a compelling ad copy for {{productName}} targeting {{audience}} in a {{tone}} tone",
+  },
+  linkedin: {
+    title: "📚 LinkedIn Post Generator",
+    fields: [
+      { label: "Topic", name: "topic", type: "text" },
+      { label: "Tone", name: "tone", type: "select", options: ["Professional", "Inspiring", "Humorous"], default: "Professional" },
+      { label: "Length", name: "length", type: "select", options: ["Short", "Medium", "Long"], default: "Medium" },
+    ],
+    promptTemplate: "Write a {{length}} LinkedIn post about {{topic}} in a {{tone}} tone",
+  },
+  socialCaption: {
+    title: "🖼 Social Media Image Caption",
+    fields: [
+      { label: "Image Description", name: "imageDescription", type: "text" },
+      { label: "Tone", name: "tone", type: "select", options: ["Funny", "Inspiring", "Professional"], default: "Funny" },
+    ],
+    promptTemplate: "Generate 5 captions in a {{tone}} tone for the social media image: {{imageDescription}}",
+  },
+  productDescription: {
+    title: "📜 Product Description Writer",
+    fields: [
+      { label: "Product Name", name: "productName", type: "text" },
+      { label: "Category", name: "category", type: "text" },
+      { label: "Features", name: "features", type: "text", placeholder: "Comma separated" },
+    ],
+    promptTemplate: "Write a detailed product description for {{productName}} in the category {{category}}, highlighting features: {{features}}",
+  },
+  youtubeScript: {
+    title: "🎥 YouTube Video Script Generator",
+    fields: [
+      { label: "Video Topic", name: "topic", type: "text" },
+      { label: "Tone", name: "tone", type: "select", options: ["Funny", "Informative", "Engaging"], default: "Informative" },
+      { label: "Length", name: "length", type: "select", options: ["Short", "Medium", "Long"], default: "Medium" },
+    ],
+    promptTemplate: "Write a {{length}} YouTube video script about {{topic}} in a {{tone}} tone",
+  },
+  quiz: {
+    title: "🧠 AI Quiz / Trivia Generator",
+    fields: [
+      { label: "Topic", name: "topic", type: "text" },
+      { label: "Number of Questions", name: "count", type: "number", min: 1, max: 20, default: 5 },
+      { label: "Difficulty", name: "difficulty", type: "select", options: ["Easy", "Medium", "Hard"], default: "Medium" },
+    ],
+    promptTemplate: "Generate {{count}} trivia questions on {{topic}} with {{difficulty}} difficulty",
+  },
+  summary: {
+    title: "📝 Summary Generator",
+    fields: [
+      { label: "Text / Article", name: "text", type: "textarea", placeholder: "Paste your text here" },
+      { label: "Summary Length", name: "length", type: "select", options: ["Short", "Medium", "Long"], default: "Medium" },
+    ],
+    promptTemplate: "Summarize the following text in a {{length}} summary:\n{{text}}",
+  },
+  customerSupport: {
+    title: "💬 AI Customer Support Response",
+    fields: [
+      { label: "Customer Query", name: "query", type: "textarea", placeholder: "Enter customer query" },
+      { label: "Tone", name: "tone", type: "select", options: ["Polite", "Professional", "Friendly"], default: "Polite" },
+    ],
+    promptTemplate: "Write a {{tone}} customer support response to the following query: {{query}}",
   },
 };
 
