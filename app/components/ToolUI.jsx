@@ -1,11 +1,28 @@
 "use client";
 
 import { useState } from "react";
+import {
+  Box,
+  Textarea,
+  Button,
+  Heading,
+  Select,
+  NumberInput,
+  NumberInputField,
+  HStack,
+} from "@chakra-ui/react";
 
-export default function ToolUI({ title, promptTemplate }) {
+export default function ToolUI({ title, promptTemplate, options = [] }) {
   const [input, setInput] = useState("");
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [settings, setSettings] = useState(
+    options.reduce((acc, opt) => ({ ...acc, [opt.name]: opt.default || "" }), {})
+  );
+
+  const handleSettingChange = (name, value) => {
+    setSettings({ ...settings, [name]: value });
+  };
 
   async function generate() {
     if (!input) return;
@@ -13,7 +30,11 @@ export default function ToolUI({ title, promptTemplate }) {
     setLoading(true);
     setOutput("");
 
-    const finalPrompt = promptTemplate.replace("{{input}}", input);
+    let finalPrompt = promptTemplate.replace("{{input}}", input);
+    // Apply settings to prompt dynamically if needed
+    Object.keys(settings).forEach((key) => {
+      finalPrompt = finalPrompt.replace(`{{${key}}}`, settings[key]);
+    });
 
     const res = await fetch("/api/generate", {
       method: "POST",
@@ -27,29 +48,70 @@ export default function ToolUI({ title, promptTemplate }) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-xl">
-      <h2 className="text-2xl font-semibold mb-6">{title}</h2>
+    <Box maxW="4xl" mx="auto" bg="white" p={8} borderRadius="2xl" boxShadow="xl">
+      <Heading size="lg" mb={6}>{title}</Heading>
 
-      <textarea
-        className="w-full border p-4 rounded-xl mb-6 focus:ring-2 focus:ring-indigo-500 outline-none"
-        rows="6"
+      {/* Dynamic Tool Options */}
+      {options.map((opt) => {
+        if (opt.type === "select") {
+          return (
+            <Select
+              key={opt.name}
+              mb={4}
+              value={settings[opt.name]}
+              onChange={(e) => handleSettingChange(opt.name, e.target.value)}
+            >
+              {opt.options.map((o) => (
+                <option key={o} value={o}>{o}</option>
+              ))}
+            </Select>
+          );
+        }
+        if (opt.type === "number") {
+          return (
+            <NumberInput
+              key={opt.name}
+              mb={4}
+              value={settings[opt.name]}
+              min={opt.min}
+              max={opt.max}
+              onChange={(valueString) => handleSettingChange(opt.name, valueString)}
+            >
+              <NumberInputField />
+            </NumberInput>
+          );
+        }
+        return null;
+      })}
+
+      <Textarea
         placeholder="Enter your input..."
         value={input}
         onChange={(e) => setInput(e.target.value)}
+        mb={4}
+        rows={6}
       />
 
-      <button
-        onClick={generate}
-        className="bg-gradient-to-r from-indigo-500 to-emerald-500 text-white px-6 py-3 rounded-xl font-medium shadow-md hover:opacity-90 transition"
-      >
-        {loading ? "Generating..." : "Generate"}
-      </button>
+      <HStack spacing={4} mb={4}>
+        <Button colorScheme="teal" onClick={generate} isLoading={loading}>
+          Generate
+        </Button>
+        <Button
+          onClick={() => navigator.clipboard.writeText(output)}
+          disabled={!output}
+        >
+          Copy Output
+        </Button>
+        <Button variant="outline" onClick={() => setInput("")}>
+          Clear
+        </Button>
+      </HStack>
 
       {output && (
-        <div className="mt-8 p-6 bg-gray-50 rounded-xl border whitespace-pre-wrap">
+        <Box mt={4} p={6} bg="gray.50" borderRadius="xl" whiteSpace="pre-wrap" maxH="400px" overflowY="auto">
           {output}
-        </div>
+        </Box>
       )}
-    </div>
+    </Box>
   );
 }
