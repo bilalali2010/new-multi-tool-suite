@@ -1,7 +1,18 @@
-export async function POST(req) {
-  const { prompt } = await req.json();
+const cache = new Map();
 
+export async function POST(req) {
   try {
+    const { prompt } = await req.json();
+
+    // ✅ Return cached result if exists
+    if (cache.has(prompt)) {
+      return Response.json({ result: cache.get(prompt) });
+    }
+
+    // ✅ Timeout setup (prevents long waiting)
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000); // 12 sec
+
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -9,20 +20,48 @@ export async function POST(req) {
         "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`
       },
       body: JSON.stringify({
-        model: "arcee-ai/trinity-large-preview:free",
+        model: "google/gemma-4-26b-a4b-it:free",
         messages: [
           { role: "user", content: prompt }
-        ]
-      })
+        ],
+        max_tokens: 150,        // ✅ limit output (faster)
+        temperature: 0.7        // ✅ balanced response
+      }),
+      signal: controller.signal
     });
+
+    clearTimeout(timeout);
+
+    // ✅ Handle bad responses
+    if (!response.ok) {
+      return Response.json(
+        { result: "API Error: " + response.status },
+        { status: response.status }
+      );
+    }
 
     const data = await response.json();
 
-    return Response.json({
-      result: data.choices?.[0]?.message?.content || "No response"
-    });
+    const result =
+      data?.choices?.[0]?.message?.content?.trim() || "No response";
+
+    // ✅ Save to cache
+    cache.set(prompt, result);
+
+    return Response.json({ result });
 
   } catch (error) {
-    return Response.json({ result: "API Error" }, { status: 500 });
+    // ✅ Handle timeout separately
+    if (error.name === "AbortError") {
+      return Response.json(
+        { result: "Request timed out. Try again." },
+        { status: 408 }
+      );
+    }
+
+    return Response.json(
+      { result: "Server Error" },
+      { status: 500 }
+    );
   }
 }
