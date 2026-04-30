@@ -11,7 +11,7 @@ import {
   Divider,
 } from "@chakra-ui/react";
 
-// ✅ ALL TOOLS (SAFE - NOTHING REMOVED)
+// ✅ ALL TOOLS UPDATED + EXPANDED
 const tools = {
   logo: {
     title: "🎨 Logo Prompt Generator",
@@ -21,30 +21,6 @@ const tools = {
     ],
     promptTemplate:
       "Create a professional logo prompt for {{brandName}} in the niche of {{brandNiche}}",
-  },
-
-  rewriter: {
-    title: "✍️ Text Rewriter",
-    fields: [
-      { label: "Text", name: "text", type: "textarea" },
-      {
-        label: "Style",
-        name: "style",
-        type: "select",
-        options: ["Simple", "Professional", "Creative"],
-        default: "Simple",
-      },
-    ],
-    promptTemplate: "Rewrite in {{style}} style:\n{{text}}",
-  },
-
-  meme: {
-    title: "🤣 Meme Idea Generator",
-    fields: [
-      { label: "Topic", name: "topic", type: "text" },
-      { label: "Count", name: "count", type: "number", default: 5 },
-    ],
-    promptTemplate: "Generate {{count}} meme ideas about {{topic}}",
   },
 
   blog: {
@@ -62,47 +38,19 @@ const tools = {
     promptTemplate: "Write a {{length}} blog about {{topic}}",
   },
 
-  news: {
-    title: "📰 News Writer",
+  seo: {
+    title: "🔍 SEO Keyword Generator",
     fields: [
-      { label: "Headline", name: "headline", type: "text" },
-      {
-        label: "Length",
-        name: "length",
-        type: "select",
-        options: ["Short", "Medium", "Long"],
-        default: "Medium",
-      },
+      { label: "Topic", name: "topic", type: "text" },
+      { label: "Count", name: "count", type: "number", default: 10 },
     ],
-    promptTemplate: "Write news article about {{headline}}",
-  },
-
-  story: {
-    title: "📖 Story Writer",
-    fields: [
-      { label: "Idea", name: "idea", type: "text" },
-      {
-        label: "Genre",
-        name: "genre",
-        type: "select",
-        options: ["Fantasy", "Sci-Fi", "Drama", "Comedy"],
-        default: "Fantasy",
-      },
-      {
-        label: "Length",
-        name: "length",
-        type: "select",
-        options: ["Short", "Medium", "Long"],
-        default: "Medium",
-      },
-    ],
-    promptTemplate: "Write a {{length}} {{genre}} story: {{idea}}",
+    promptTemplate: "Generate {{count}} SEO keywords for {{topic}}",
   },
 
   caption: {
-    title: "📱 Caption Generator",
+    title: "📱 Social Media Caption Writer",
     fields: [
-      { label: "Post", name: "description", type: "text" },
+      { label: "Post Description", name: "description", type: "text" },
       {
         label: "Tone",
         name: "tone",
@@ -113,21 +61,112 @@ const tools = {
       { label: "Count", name: "count", type: "number", default: 3 },
     ],
     promptTemplate:
-      "Generate {{count}} captions in {{tone}} tone for: {{description}}",
+      "Generate {{count}} social media captions in {{tone}} tone for: {{description}}",
   },
 
-  seo: {
-    title: "🔍 SEO Keywords",
+  adcopy: {
+    title: "📢 AI Marketing Ad Copy",
+    fields: [
+      { label: "Product/Service", name: "product", type: "text" },
+      {
+        label: "Platform",
+        name: "platform",
+        type: "select",
+        options: ["Facebook", "Instagram", "Google Ads", "TikTok"],
+        default: "Facebook",
+      },
+    ],
+    promptTemplate:
+      "Write high-converting ad copy for {{product}} for {{platform}}",
+  },
+
+  email: {
+    title: "📧 AI Email Writer",
+    fields: [
+      { label: "Purpose", name: "purpose", type: "text" },
+      {
+        label: "Tone",
+        name: "tone",
+        type: "select",
+        options: ["Formal", "Friendly", "Persuasive"],
+        default: "Formal",
+      },
+    ],
+    promptTemplate:
+      "Write a {{tone}} email for the purpose: {{purpose}}",
+  },
+
+  product: {
+    title: "🛍️ Product Description Writer",
+    fields: [
+      { label: "Product Name", name: "product", type: "text" },
+      { label: "Features", name: "features", type: "text" },
+    ],
+    promptTemplate:
+      "Write a compelling product description for {{product}} with features: {{features}}",
+  },
+
+  resume: {
+    title: "📄 AI Resume Builder",
+    fields: [
+      { label: "Name", name: "name", type: "text" },
+      { label: "Skills", name: "skills", type: "text" },
+      { label: "Experience", name: "experience", type: "textarea" },
+    ],
+    promptTemplate:
+      "Create a professional resume for {{name}} with skills {{skills}} and experience {{experience}}",
+  },
+
+  rewriter: {
+    title: "✍️ Text Rewriter",
+    fields: [
+      { label: "Text", name: "text", type: "textarea" },
+      {
+        label: "Style",
+        name: "style",
+        type: "select",
+        options: ["Simple", "Professional", "Creative"],
+        default: "Simple",
+      },
+    ],
+    promptTemplate: "Rewrite in {{style}} style:\n{{text}}",
+  },
+
+  youtube: {
+    title: "🎬 YouTube Video Script Generator",
     fields: [
       { label: "Topic", name: "topic", type: "text" },
-      { label: "Count", name: "count", type: "number", default: 10 },
+      {
+        label: "Style",
+        name: "style",
+        type: "select",
+        options: ["Educational", "Entertainment", "Review"],
+        default: "Educational",
+      },
     ],
-    promptTemplate: "Generate {{count}} SEO keywords for {{topic}}",
+    promptTemplate:
+      "Write a {{style}} YouTube video script about {{topic}}",
+  },
+
+  support: {
+    title: "💬 AI Customer Support Response",
+    fields: [
+      { label: "Customer Issue", name: "issue", type: "textarea" },
+      {
+        label: "Tone",
+        name: "tone",
+        type: "select",
+        options: ["Polite", "Friendly", "Professional"],
+        default: "Professional",
+      },
+    ],
+    promptTemplate:
+      "Write a {{tone}} customer support response for: {{issue}}",
   },
 };
 
 export default function Home() {
-  const [selectedTool, setSelectedTool] = useState("logo");
+  const [selectedTool, setSelectedTool] = useState("blog");
 
   const currentTool = tools[selectedTool];
 
@@ -141,9 +180,8 @@ export default function Home() {
           ✨ AI Multi-Tool Suite
         </Heading>
 
-        {/* STATIC TEXT (NO TYPEWRITER) */}
         <Text fontSize="md" color="gray.500">
-          Build Logos ⚡ | Write Blogs 📝 | Generate Ads 🎯 | AI Tools Made Easy 🚀
+          Build, Write, Market & Automate Everything with AI 🚀
         </Text>
 
       </VStack>
