@@ -19,7 +19,7 @@ export async function POST(req) {
         "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`
       },
       body: JSON.stringify({
-        model: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+        model: "kwaivgi/kling-v3.0-pro",
         messages: [
           { role: "user", content: prompt }
         ],
