@@ -9,114 +9,181 @@ import {
   Text,
   Input,
   VStack,
-  HStack,
-  Divider,
   SimpleGrid,
   Button,
   Badge,
-  IconButton,
+  Select,
+  Divider,
 } from "@chakra-ui/react";
-import { Search } from "lucide-react";
 
 // ============================
-// 🚀 TOOLS (UNCHANGED LOGIC)
+// 🚀 FULL TOOL SUITE (HIGH DEMAND + CORE)
 // ============================
 const tools = {
+
+  // ================= WRITING =================
   blog: {
     title: "📝 AI Blog Generator",
     category: "Writing",
-    promptTemplate: "Write a blog about {{topic}}",
     fields: [{ label: "Topic", name: "topic", type: "text" }],
-  },
-
-  seo: {
-    title: "🔍 SEO Keyword Generator",
-    category: "Marketing",
-    promptTemplate: "Generate SEO keywords for {{topic}}",
-    fields: [{ label: "Topic", name: "topic", type: "text" }],
-  },
-
-  caption: {
-    title: "📱 Caption Writer",
-    category: "Marketing",
-    promptTemplate: "Write captions for {{description}}",
-    fields: [{ label: "Post", name: "description", type: "text" }],
-  },
-
-  adcopy: {
-    title: "📢 Ad Copy Generator",
-    category: "Marketing",
-    promptTemplate: "Write ad copy for {{product}}",
-    fields: [{ label: "Product", name: "product", type: "text" }],
+    basePrompt: "Write a high-quality blog about {{topic}}",
   },
 
   email: {
     title: "📧 Email Writer",
     category: "Writing",
-    promptTemplate: "Write email for {{purpose}}",
     fields: [{ label: "Purpose", name: "purpose", type: "text" }],
-  },
-
-  product: {
-    title: "🛍️ Product Description",
-    category: "Business",
-    promptTemplate: "Describe {{product}}",
-    fields: [{ label: "Product", name: "product", type: "text" }],
-  },
-
-  resume: {
-    title: "📄 Resume Builder",
-    category: "Business",
-    promptTemplate: "Build resume for {{name}}",
-    fields: [{ label: "Name", name: "name", type: "text" }],
+    basePrompt: "Write a professional email for {{purpose}}",
   },
 
   rewriter: {
     title: "✍️ Text Rewriter",
     category: "Writing",
-    promptTemplate: "Rewrite: {{text}}",
     fields: [{ label: "Text", name: "text", type: "textarea" }],
+    basePrompt: "Rewrite this text: {{text}}",
   },
 
-  youtube: {
-    title: "🎬 YouTube Script",
-    category: "Content",
-    promptTemplate: "Write YouTube script about {{topic}}",
+  notes: {
+    title: "📚 Study Notes Summarizer",
+    category: "Education",
+    fields: [{ label: "Text", name: "text", type: "textarea" }],
+    basePrompt: "Summarize and simplify: {{text}}",
+  },
+
+  // ================= MARKETING =================
+  caption: {
+    title: "📱 Social Caption Writer",
+    category: "Marketing",
+    fields: [{ label: "Post", name: "description", type: "text" }],
+    basePrompt: "Write viral captions for {{description}}",
+  },
+
+  adcopy: {
+    title: "📢 Ad Copy Generator",
+    category: "Marketing",
+    fields: [{ label: "Product", name: "product", type: "text" }],
+    basePrompt: "Write high-converting ad copy for {{product}}",
+  },
+
+  landing: {
+    title: "🎯 Landing Page Generator",
+    category: "Marketing",
+    fields: [{ label: "Product", name: "product", type: "text" }],
+    basePrompt: "Create landing page copy for {{product}}",
+  },
+
+  coldemail: {
+    title: "📨 Cold Email Outreach",
+    category: "Marketing",
+    fields: [{ label: "Offer", name: "offer", type: "text" }],
+    basePrompt: "Write cold outreach email for {{offer}}",
+  },
+
+  linkedin: {
+    title: "💼 LinkedIn Post Generator",
+    category: "Marketing",
     fields: [{ label: "Topic", name: "topic", type: "text" }],
+    basePrompt: "Write viral LinkedIn post about {{topic}}",
   },
 
-  support: {
-    title: "💬 Support AI",
+  seo: {
+    title: "🔍 SEO Keyword Generator",
+    category: "SEO",
+    fields: [{ label: "Topic", name: "topic", type: "text" }],
+    basePrompt: "Generate SEO keywords for {{topic}}",
+  },
+
+  // ================= BUSINESS =================
+  businessplan: {
+    title: "📊 Business Plan Generator",
     category: "Business",
-    promptTemplate: "Reply to: {{issue}}",
-    fields: [{ label: "Issue", name: "issue", type: "textarea" }],
+    fields: [{ label: "Idea", name: "idea", type: "text" }],
+    basePrompt: "Create business plan for {{idea}}",
   },
 
+  pitchdeck: {
+    title: "📈 Pitch Deck Creator",
+    category: "Business",
+    fields: [{ label: "Startup", name: "startup", type: "text" }],
+    basePrompt: "Create pitch deck for {{startup}}",
+  },
+
+  jobdesc: {
+    title: "🧑‍💼 Job Description Generator",
+    category: "HR",
+    fields: [{ label: "Role", name: "role", type: "text" }],
+    basePrompt: "Write job description for {{role}}",
+  },
+
+  // ================= PRODUCTIVITY =================
+  workflow: {
+    title: "⚙️ AI Workflow Planner",
+    category: "Automation",
+    fields: [{ label: "Task", name: "task", type: "text" }],
+    basePrompt: "Break task into automation steps: {{task}}",
+  },
+
+  // ================= CREATIVE =================
   logo: {
     title: "🎨 Logo Generator",
     category: "Design",
-    promptTemplate: "Create logo for {{brandName}}",
     fields: [{ label: "Brand", name: "brandName", type: "text" }],
+    basePrompt: "Create logo ideas for {{brandName}}",
   },
 };
 
+// ============================
+// 🚀 UNIVERSAL AI CONTROLS
+// ============================
+const controlOptions = {
+  type: ["Informative", "Creative", "Persuasive", "Professional"],
+  tone: ["Friendly", "Formal", "Funny", "Sales", "Neutral"],
+  length: ["Short", "Medium", "Long"],
+  style: ["Simple", "Advanced", "Viral"],
+};
+
 export default function Home() {
-  const [selectedTool, setSelectedTool] = useState(null);
+  const [selectedTool, setSelectedTool] = useState("blog");
   const [search, setSearch] = useState("");
 
-  const filteredTools = Object.entries(tools).filter(([key, tool]) =>
+  const [controls, setControls] = useState({
+    type: "Informative",
+    tone: "Professional",
+    length: "Medium",
+    style: "Simple",
+  });
+
+  const currentTool = tools[selectedTool];
+
+  // ============================
+  // 🚀 PROMPT ENGINE (CORE LOGIC)
+  // ============================
+  const buildPrompt = (tool) => {
+    return `
+AI SYSTEM INSTRUCTIONS:
+- Type: ${controls.type}
+- Tone: ${controls.tone}
+- Length: ${controls.length}
+- Style: ${controls.style}
+
+Follow strictly and generate high-quality output.
+
+TASK:
+${tool.basePrompt}
+`;
+  };
+
+  const filteredTools = Object.entries(tools).filter(([_, tool]) =>
     tool.title.toLowerCase().includes(search.toLowerCase())
   );
-
-  const currentTool = selectedTool ? tools[selectedTool] : null;
 
   return (
     <Flex h="100vh" bg="gray.50">
 
       {/* ================= SIDEBAR ================= */}
       <Box w="260px" bg="white" borderRight="1px solid #eee" p={4}>
-        <Heading size="md" color="teal.500" mb={6}>
-          ⚡ AI Studio
+        <Heading size="md" color="teal.500" mb={4}>
+          ⚡ AI Studio Pro
         </Heading>
 
         <Input
@@ -126,12 +193,11 @@ export default function Home() {
           onChange={(e) => setSearch(e.target.value)}
         />
 
-        <VStack align="stretch" spacing={1}>
-          {Object.entries(tools).map(([key, tool]) => (
+        <VStack spacing={2} align="stretch">
+          {filteredTools.map(([key, tool]) => (
             <Button
               key={key}
               size="sm"
-              justifyContent="flex-start"
               variant={selectedTool === key ? "solid" : "ghost"}
               colorScheme="teal"
               onClick={() => setSelectedTool(key)}
@@ -142,86 +208,62 @@ export default function Home() {
         </VStack>
       </Box>
 
-      {/* ================= MAIN AREA ================= */}
+      {/* ================= MAIN ================= */}
       <Box flex="1" p={6} overflowY="auto">
 
         {/* HEADER */}
-        <Flex justify="space-between" align="center" mb={6}>
+        <Flex justify="space-between" align="center" mb={4}>
           <Box>
             <Heading size="lg">
-              {selectedTool ? currentTool.title : "🚀 AI Dashboard"}
+              {currentTool.title}
             </Heading>
             <Text color="gray.500">
-              Build content, marketing & automation tools
+              AI SaaS Multi-Tool Platform
             </Text>
           </Box>
 
           <Badge colorScheme="green" p={2}>
-            SaaS v3
+            PRO MODE
           </Badge>
         </Flex>
 
+        <Divider mb={4} />
+
+        {/* ================= UNIVERSAL CONTROLS ================= */}
+        <SimpleGrid columns={2} spacing={4} mb={6}>
+          {Object.keys(controlOptions).map((key) => (
+            <Box key={key}>
+              <Text fontSize="sm" fontWeight="bold" mb={1}>
+                {key.toUpperCase()}
+              </Text>
+
+              <Select
+                value={controls[key]}
+                onChange={(e) =>
+                  setControls({ ...controls, [key]: e.target.value })
+                }
+              >
+                {controlOptions[key].map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </Select>
+            </Box>
+          ))}
+        </SimpleGrid>
+
         <Divider mb={6} />
 
-        {/* ================= DASHBOARD VIEW ================= */}
-        {!selectedTool ? (
-          <>
-            <SimpleGrid columns={[1, 2, 3]} spacing={4}>
-              {filteredTools.map(([key, tool]) => (
-                <Box
-                  key={key}
-                  bg="white"
-                  p={5}
-                  borderRadius="xl"
-                  boxShadow="sm"
-                  cursor="pointer"
-                  transition="0.2s"
-                  _hover={{
-                    transform: "scale(1.03)",
-                    boxShadow: "lg",
-                  }}
-                  onClick={() => setSelectedTool(key)}
-                >
-                  <Text fontSize="lg" fontWeight="bold">
-                    {tool.title}
-                  </Text>
+        {/* ================= TOOL UI ================= */}
+        <Box bg="white" p={6} borderRadius="xl" boxShadow="sm">
+          <ToolUI
+            title={currentTool.title}
+            fields={currentTool.fields}
+            promptTemplate={buildPrompt(currentTool)}
+          />
+        </Box>
 
-                  <Badge mt={2} colorScheme="purple">
-                    {tool.category}
-                  </Badge>
-
-                  <Text fontSize="sm" mt={2} color="gray.500">
-                    Click to open tool →
-                  </Text>
-                </Box>
-              ))}
-            </SimpleGrid>
-          </>
-        ) : (
-          <>
-            {/* TOOL VIEW */}
-            <Box
-              bg="white"
-              p={6}
-              borderRadius="xl"
-              boxShadow="sm"
-            >
-              <Button
-                size="sm"
-                mb={4}
-                onClick={() => setSelectedTool(null)}
-              >
-                ← Back to Dashboard
-              </Button>
-
-              <ToolUI
-                title={currentTool.title}
-                fields={currentTool.fields}
-                promptTemplate={currentTool.promptTemplate}
-              />
-            </Box>
-          </>
-        )}
       </Box>
     </Flex>
   );
