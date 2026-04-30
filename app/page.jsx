@@ -11,7 +11,9 @@ import {
   Divider,
 } from "@chakra-ui/react";
 
-// ✅ ALL TOOLS UPDATED + EXPANDED
+// ================================
+// 🚀 PRO AI TOOL SYSTEM (UPGRADED)
+// ================================
 const tools = {
   logo: {
     title: "🎨 Logo Prompt Generator",
@@ -19,8 +21,20 @@ const tools = {
       { label: "Brand Name", name: "brandName", type: "text" },
       { label: "Brand Niche", name: "brandNiche", type: "text" },
     ],
-    promptTemplate:
-      "Create a professional logo prompt for {{brandName}} in the niche of {{brandNiche}}",
+    promptTemplate: `
+You are a professional brand identity designer.
+
+Create a high-quality logo design prompt.
+
+Brand Name: {{brandName}}
+Niche: {{brandNiche}}
+
+Return:
+- Logo concept description
+- Color suggestions
+- Style direction
+- Typography ideas
+`,
   },
 
   blog: {
@@ -35,7 +49,19 @@ const tools = {
         default: "Medium",
       },
     ],
-    promptTemplate: "Write a {{length}} blog about {{topic}}",
+    promptTemplate: `
+You are an expert content writer.
+
+Write a {{length}} SEO-optimized blog post.
+
+Topic: {{topic}}
+
+Include:
+- Engaging introduction
+- Clear headings
+- Valuable insights
+- Conclusion
+`,
   },
 
   seo: {
@@ -44,7 +70,18 @@ const tools = {
       { label: "Topic", name: "topic", type: "text" },
       { label: "Count", name: "count", type: "number", default: 10 },
     ],
-    promptTemplate: "Generate {{count}} SEO keywords for {{topic}}",
+    promptTemplate: `
+You are an SEO expert.
+
+Generate {{count}} high-ranking SEO keywords.
+
+Topic: {{topic}}
+
+Return:
+- High search volume keywords
+- Long-tail keywords
+- Trending variations
+`,
   },
 
   caption: {
@@ -60,8 +97,15 @@ const tools = {
       },
       { label: "Count", name: "count", type: "number", default: 3 },
     ],
-    promptTemplate:
-      "Generate {{count}} social media captions in {{tone}} tone for: {{description}}",
+    promptTemplate: `
+You are a social media marketing expert.
+
+Generate {{count}} engaging captions in {{tone}} tone.
+
+Post: {{description}}
+
+Make them viral, engaging, and emoji-rich.
+`,
   },
 
   adcopy: {
@@ -76,8 +120,18 @@ const tools = {
         default: "Facebook",
       },
     ],
-    promptTemplate:
-      "Write high-converting ad copy for {{product}} for {{platform}}",
+    promptTemplate: `
+You are a high-converting marketing copywriter.
+
+Write persuasive ad copy for {{platform}}.
+
+Product: {{product}}
+
+Include:
+- Hook
+- Emotional trigger
+- Call to action
+`,
   },
 
   email: {
@@ -92,8 +146,20 @@ const tools = {
         default: "Formal",
       },
     ],
-    promptTemplate:
-      "Write a {{tone}} email for the purpose: {{purpose}}",
+    promptTemplate: `
+You are a professional email copywriter.
+
+Write a {{tone}} business email.
+
+Purpose: {{purpose}}
+
+Format strictly:
+Subject:
+Greeting:
+Body:
+Call to Action:
+Signature:
+`,
   },
 
   product: {
@@ -102,8 +168,19 @@ const tools = {
       { label: "Product Name", name: "product", type: "text" },
       { label: "Features", name: "features", type: "text" },
     ],
-    promptTemplate:
-      "Write a compelling product description for {{product}} with features: {{features}}",
+    promptTemplate: `
+You are an eCommerce copywriting expert.
+
+Write a persuasive product description.
+
+Product: {{product}}
+Features: {{features}}
+
+Include:
+- Emotional appeal
+- Benefits
+- Sales-driven tone
+`,
   },
 
   resume: {
@@ -113,8 +190,21 @@ const tools = {
       { label: "Skills", name: "skills", type: "text" },
       { label: "Experience", name: "experience", type: "textarea" },
     ],
-    promptTemplate:
-      "Create a professional resume for {{name}} with skills {{skills}} and experience {{experience}}",
+    promptTemplate: `
+You are a professional HR recruiter.
+
+Create a modern ATS-friendly resume.
+
+Name: {{name}}
+Skills: {{skills}}
+Experience: {{experience}}
+
+Format:
+- Summary
+- Skills
+- Experience
+- Education
+`,
   },
 
   rewriter: {
@@ -129,7 +219,16 @@ const tools = {
         default: "Simple",
       },
     ],
-    promptTemplate: "Rewrite in {{style}} style:\n{{text}}",
+    promptTemplate: `
+You are a professional editor.
+
+Rewrite the text in {{style}} style.
+
+Text:
+{{text}}
+
+Maintain original meaning but improve clarity.
+`,
   },
 
   youtube: {
@@ -144,8 +243,19 @@ const tools = {
         default: "Educational",
       },
     ],
-    promptTemplate:
-      "Write a {{style}} YouTube video script about {{topic}}",
+    promptTemplate: `
+You are a YouTube content strategist.
+
+Write a {{style}} video script.
+
+Topic: {{topic}}
+
+Include:
+- Hook (first 10 seconds)
+- Main content
+- Engagement prompts
+- Ending CTA
+`,
   },
 
   support: {
@@ -160,11 +270,24 @@ const tools = {
         default: "Professional",
       },
     ],
-    promptTemplate:
-      "Write a {{tone}} customer support response for: {{issue}}",
+    promptTemplate: `
+You are a customer support specialist.
+
+Write a {{tone}} response.
+
+Issue: {{issue}}
+
+Must include:
+- Empathy
+- Solution
+- Follow-up offer
+`,
   },
 };
 
+// ================================
+// 🚀 MAIN APP
+// ================================
 export default function Home() {
   const [selectedTool, setSelectedTool] = useState("blog");
 
@@ -177,11 +300,11 @@ export default function Home() {
       <VStack spacing={2} mb={6} textAlign="center">
 
         <Heading size="lg" color="teal.500">
-          ✨ AI Multi-Tool Suite
+          🚀 AI Multi-Tool Suite (PRO SYSTEM)
         </Heading>
 
         <Text fontSize="md" color="gray.500">
-          Build, Write, Market & Automate Everything with AI 🚀
+          Smart AI Agents for Writing, Marketing & Business Automation
         </Text>
 
       </VStack>
