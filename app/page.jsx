@@ -5,181 +5,312 @@ import ToolUI from "./components/ToolUI";
 import {
   Box,
   VStack,
-  HStack,
-  Button,
-  Heading,
   Select,
-  Stack,
-  Text,
+  Heading,
 } from "@chakra-ui/react";
 
-// All 18 tools
+import { Typewriter } from "react-simple-typewriter";
+
+/* =========================
+   TOOLS (ALL RESTORED + FIXED)
+========================= */
+
 const tools = {
   logo: {
     title: "🎨 Logo Prompt Generator",
     fields: [
-      { label: "🏷 Brand Name", name: "brandName", type: "text", placeholder: "Enter brand name" },
-      { label: "🎯 Brand Niche", name: "brandNiche", type: "text", placeholder: "Enter brand niche" },
+      { label: "🏷 Brand Name", name: "brandName", type: "text" },
+      { label: "🎯 Brand Niche", name: "brandNiche", type: "text" },
     ],
-    promptTemplate: "Create a professional logo prompt for {{brandName}} in the niche of {{brandNiche}}",
+    promptTemplate:
+      "Generate ONLY a single AI logo prompt for brand '{{brandName}}' in '{{brandNiche}}' niche. No explanation. Only final prompt.",
   },
+
   rewriter: {
     title: "✍️ Text Rewriter",
     fields: [
-      { label: "📄 Original Text", name: "text", type: "textarea", placeholder: "Enter text to rewrite" },
-      { label: "🎨 Rewrite Style", name: "style", type: "select", options: ["Simple", "Professional", "Creative"], default: "Simple" },
+      { label: "📄 Original Text", name: "text", type: "textarea" },
+      {
+        label: "🎨 Rewrite Style",
+        name: "style",
+        type: "select",
+        options: ["Simple", "Professional", "Creative"],
+        default: "Simple",
+      },
     ],
-    promptTemplate: "Rewrite the following text in a {{style}} style:\n{{text}}",
+    promptTemplate:
+      "Rewrite in {{style}} style. ONLY final rewritten text:\n{{text}}",
   },
+
   meme: {
     title: "🤣 Meme Idea Generator",
     fields: [
-      { label: "🔥 Topic", name: "topic", type: "text", placeholder: "Enter meme topic" },
-      { label: "📝 Number of Ideas", name: "count", type: "number", min: 1, max: 10, default: 5 },
+      { label: "🔥 Topic", name: "topic", type: "text" },
+      { label: "📝 Count", name: "count", type: "number", default: 5 },
     ],
-    promptTemplate: "Generate {{count}} meme ideas about {{topic}}",
+    promptTemplate:
+      "Generate {{count}} meme ideas about {{topic}}. Only list ideas.",
   },
+
   blog: {
     title: "📝 AI Blog Generator",
     fields: [
-      { label: "🧠 Blog Topic", name: "topic", type: "text", placeholder: "Enter blog topic" },
-      { label: "📏 Length", name: "length", type: "select", options: ["Short", "Medium", "Long"], default: "Medium" },
+      { label: "🧠 Topic", name: "topic", type: "text" },
+      {
+        label: "📏 Length",
+        name: "length",
+        type: "select",
+        options: ["Short", "Medium", "Long"],
+        default: "Medium",
+      },
     ],
-    promptTemplate: "Write a detailed {{length}} blog with headings about {{topic}}",
+    promptTemplate:
+      "Write a {{length}} blog about {{topic}}. ONLY final blog with headings. No reasoning.",
   },
+
   news: {
     title: "📰 News Article Writer",
     fields: [
-      { label: "🗞 Headline", name: "headline", type: "text", placeholder: "Enter headline" },
-      { label: "📏 Length", name: "length", type: "select", options: ["Short", "Medium", "Long"], default: "Medium" },
+      { label: "🗞 Headline", name: "headline", type: "text" },
+      {
+        label: "📏 Length",
+        name: "length",
+        type: "select",
+        options: ["Short", "Medium", "Long"],
+        default: "Medium",
+      },
     ],
-    promptTemplate: "Write a news article ({{length}}) about {{headline}}",
+    promptTemplate:
+      "Write a {{length}} news article about {{headline}}. Only final article.",
   },
+
   story: {
     title: "📖 Story Writer",
     fields: [
-      { label: "🌱 Story Idea", name: "idea", type: "text", placeholder: "Enter story idea" },
-      { label: "Genre", name: "genre", type: "select", options: ["Fantasy", "Sci-Fi", "Drama", "Comedy"], default: "Fantasy" },
-      { label: "📏 Length", name: "length", type: "select", options: ["Short", "Medium", "Long"], default: "Medium" },
+      { label: "🌱 Idea", name: "idea", type: "text" },
+      {
+        label: "Genre",
+        name: "genre",
+        type: "select",
+        options: ["Fantasy", "Sci-Fi", "Drama", "Comedy"],
+        default: "Fantasy",
+      },
+      {
+        label: "Length",
+        name: "length",
+        type: "select",
+        options: ["Short", "Medium", "Long"],
+        default: "Medium",
+      },
     ],
-    promptTemplate: "Write a {{length}} {{genre}} story based on the idea: {{idea}}",
+    promptTemplate:
+      "Write a {{length}} {{genre}} story about {{idea}}. Only final story.",
   },
+
   caption: {
-    title: "📱 Social Media Caption Writer",
+    title: "📱 Social Caption Writer",
     fields: [
-      { label: "📸 Post Description", name: "description", type: "text", placeholder: "Enter post description" },
-      { label: "Tone", name: "tone", type: "select", options: ["Funny", "Inspirational", "Professional"], default: "Funny" },
-      { label: "Number of Captions", name: "count", type: "number", min: 1, max: 5, default: 3 },
+      { label: "📸 Description", name: "description", type: "text" },
+      {
+        label: "Tone",
+        name: "tone",
+        type: "select",
+        options: ["Funny", "Inspirational", "Professional"],
+        default: "Funny",
+      },
+      { label: "Count", name: "count", type: "number", default: 3 },
     ],
-    promptTemplate: "Generate {{count}} social media captions in a {{tone}} tone for: {{description}}",
+    promptTemplate:
+      "Generate {{count}} captions in {{tone}} tone for: {{description}}",
   },
+
   seo: {
     title: "🔍 SEO Keyword Generator",
     fields: [
-      { label: "🌐 Topic", name: "topic", type: "text", placeholder: "Enter topic" },
-      { label: "Number of Keywords", name: "count", type: "number", min: 1, max: 20, default: 10 },
+      { label: "🌐 Topic", name: "topic", type: "text" },
+      { label: "Count", name: "count", type: "number", default: 10 },
     ],
-    promptTemplate: "Generate {{count}} SEO keywords for {{topic}}",
+    promptTemplate:
+      "Generate {{count}} SEO keywords for {{topic}}. Only keywords list.",
   },
+
   email: {
-    title: "📧 AI Email Writer",
+    title: "📧 Email Writer",
     fields: [
-      { label: "📬 Email Purpose", name: "purpose", type: "text", placeholder: "Enter purpose" },
-      { label: "Tone", name: "tone", type: "select", options: ["Formal", "Casual", "Persuasive"], default: "Formal" },
+      { label: "Purpose", name: "purpose", type: "text" },
+      {
+        label: "Tone",
+        name: "tone",
+        type: "select",
+        options: ["Formal", "Casual", "Persuasive"],
+        default: "Formal",
+      },
     ],
-    promptTemplate: "Write a professional email ({{tone}}) about: {{purpose}}",
+    promptTemplate:
+      "Write a {{tone}} email about {{purpose}}. Only final email.",
   },
+
   resume: {
-    title: "🧩 AI Resume Builder",
+    title: "🧩 Resume Builder",
     fields: [
-      { label: "Full Name", name: "fullName", type: "text" },
-      { label: "Job Title", name: "jobTitle", type: "text" },
-      { label: "Skills", name: "skills", type: "text", placeholder: "Comma separated" },
-      { label: "Experience Summary", name: "experience", type: "textarea", placeholder: "Enter your experience" },
+      { label: "Name", name: "fullName", type: "text" },
+      { label: "Job", name: "jobTitle", type: "text" },
+      { label: "Skills", name: "skills", type: "text" },
+      { label: "Experience", name: "experience", type: "textarea" },
     ],
-    promptTemplate: "Create a professional resume for {{fullName}}, applying for {{jobTitle}} with skills {{skills}} and experience: {{experience}}",
+    promptTemplate:
+      "Create resume for {{fullName}}, job {{jobTitle}}, skills {{skills}}, experience {{experience}}.",
   },
+
   adcopy: {
-    title: "🎯 AI Marketing Ad Copy",
+    title: "🎯 Ad Copy Generator",
     fields: [
-      { label: "Product/Service Name", name: "productName", type: "text" },
-      { label: "Target Audience", name: "audience", type: "text" },
-      { label: "Tone", name: "tone", type: "select", options: ["Friendly", "Persuasive", "Formal"], default: "Friendly" },
+      { label: "Product", name: "productName", type: "text" },
+      { label: "Audience", name: "audience", type: "text" },
+      {
+        label: "Tone",
+        name: "tone",
+        type: "select",
+        options: ["Friendly", "Persuasive", "Formal"],
+        default: "Friendly",
+      },
     ],
-    promptTemplate: "Write a compelling ad copy for {{productName}} targeting {{audience}} in a {{tone}} tone",
+    promptTemplate:
+      "Write ad copy for {{productName}} targeting {{audience}} in {{tone}} tone.",
   },
+
   linkedin: {
-    title: "📚 LinkedIn Post Generator",
+    title: "📚 LinkedIn Post",
     fields: [
       { label: "Topic", name: "topic", type: "text" },
-      { label: "Tone", name: "tone", type: "select", options: ["Professional", "Inspiring", "Humorous"], default: "Professional" },
-      { label: "Length", name: "length", type: "select", options: ["Short", "Medium", "Long"], default: "Medium" },
+      {
+        label: "Tone",
+        name: "tone",
+        type: "select",
+        options: ["Professional", "Inspiring", "Humorous"],
+        default: "Professional",
+      },
     ],
-    promptTemplate: "Write a {{length}} LinkedIn post about {{topic}} in a {{tone}} tone",
+    promptTemplate:
+      "Write LinkedIn post about {{topic}} in {{tone}} tone.",
   },
+
   socialCaption: {
-    title: "🖼 Social Media Image Caption",
+    title: "🖼 Image Caption",
     fields: [
-      { label: "Image Description", name: "imageDescription", type: "text" },
-      { label: "Tone", name: "tone", type: "select", options: ["Funny", "Inspiring", "Professional"], default: "Funny" },
+      { label: "Image", name: "imageDescription", type: "text" },
+      {
+        label: "Tone",
+        name: "tone",
+        type: "select",
+        options: ["Funny", "Inspiring", "Professional"],
+        default: "Funny",
+      },
     ],
-    promptTemplate: "Generate 5 captions in a {{tone}} tone for the social media image: {{imageDescription}}",
+    promptTemplate:
+      "Generate captions for image: {{imageDescription}} in {{tone}} tone.",
   },
+
   productDescription: {
-    title: "📜 Product Description Writer",
+    title: "📜 Product Description",
     fields: [
-      { label: "Product Name", name: "productName", type: "text" },
+      { label: "Product", name: "productName", type: "text" },
       { label: "Category", name: "category", type: "text" },
-      { label: "Features", name: "features", type: "text", placeholder: "Comma separated" },
+      { label: "Features", name: "features", type: "text" },
     ],
-    promptTemplate: "Write a detailed product description for {{productName}} in the category {{category}}, highlighting features: {{features}}",
+    promptTemplate:
+      "Write product description for {{productName}} in {{category}} with features {{features}}.",
   },
+
   youtubeScript: {
-    title: "🎥 YouTube Video Script Generator",
-    fields: [
-      { label: "Video Topic", name: "topic", type: "text" },
-      { label: "Tone", name: "tone", type: "select", options: ["Funny", "Informative", "Engaging"], default: "Informative" },
-      { label: "Length", name: "length", type: "select", options: ["Short", "Medium", "Long"], default: "Medium" },
-    ],
-    promptTemplate: "Write a {{length}} YouTube video script about {{topic}} in a {{tone}} tone",
-  },
-  quiz: {
-    title: "🧠 AI Quiz / Trivia Generator",
+    title: "🎥 YouTube Script",
     fields: [
       { label: "Topic", name: "topic", type: "text" },
-      { label: "Number of Questions", name: "count", type: "number", min: 1, max: 20, default: 5 },
-      { label: "Difficulty", name: "difficulty", type: "select", options: ["Easy", "Medium", "Hard"], default: "Medium" },
+      {
+        label: "Tone",
+        name: "tone",
+        type: "select",
+        options: ["Funny", "Informative", "Engaging"],
+        default: "Informative",
+      },
     ],
-    promptTemplate: "Generate {{count}} trivia questions on {{topic}} with {{difficulty}} difficulty",
+    promptTemplate:
+      "Write YouTube script about {{topic}} in {{tone}} tone.",
   },
+
+  quiz: {
+    title: "🧠 Quiz Generator",
+    fields: [
+      { label: "Topic", name: "topic", type: "text" },
+      { label: "Count", name: "count", type: "number", default: 5 },
+      {
+        label: "Difficulty",
+        name: "difficulty",
+        type: "select",
+        options: ["Easy", "Medium", "Hard"],
+        default: "Medium",
+      },
+    ],
+    promptTemplate:
+      "Generate {{count}} {{difficulty}} questions about {{topic}}.",
+  },
+
   summary: {
-    title: "📝 Summary Generator",
+    title: "📝 Summary Tool",
     fields: [
-      { label: "Text / Article", name: "text", type: "textarea", placeholder: "Paste your text here" },
-      { label: "Summary Length", name: "length", type: "select", options: ["Short", "Medium", "Long"], default: "Medium" },
+      { label: "Text", name: "text", type: "textarea" },
+      {
+        label: "Length",
+        name: "length",
+        type: "select",
+        options: ["Short", "Medium", "Long"],
+        default: "Medium",
+      },
     ],
-    promptTemplate: "Summarize the following text in a {{length}} summary:\n{{text}}",
+    promptTemplate:
+      "Summarize in {{length}}: {{text}}",
   },
+
   customerSupport: {
-    title: "💬 AI Customer Support Response",
+    title: "💬 Support Reply",
     fields: [
-      { label: "Customer Query", name: "query", type: "textarea", placeholder: "Enter customer query" },
-      { label: "Tone", name: "tone", type: "select", options: ["Polite", "Professional", "Friendly"], default: "Polite" },
+      { label: "Query", name: "query", type: "textarea" },
+      {
+        label: "Tone",
+        name: "tone",
+        type: "select",
+        options: ["Polite", "Professional", "Friendly"],
+        default: "Polite",
+      },
     ],
-    promptTemplate: "Write a {{tone}} customer support response to the following query: {{query}}",
+    promptTemplate:
+      "Write {{tone}} support reply: {{query}}",
   },
 };
+
+/* =========================
+   MAIN UI
+========================= */
 
 export default function Home() {
   const [selectedTool, setSelectedTool] = useState("logo");
 
   return (
     <Box p={4} maxW="5xl" mx="auto">
-      {/* Tool Selector */}
+
       <VStack spacing={4} mb={6} align="stretch">
         <Heading size="lg" bgGradient="linear(to-r, teal.500, green.500)" bgClip="text">
-          ✨ AI Multi-Tool Suite
+          <Typewriter
+            words={["✨ AI Multi-Tool Suite", "⚡ Smart AI Tools", "🚀 Creator Studio"]}
+            loop={0}
+            cursor
+            cursorStyle="|"
+            typeSpeed={70}
+            deleteSpeed={40}
+            delaySpeed={1500}
+          />
         </Heading>
+
         <Select
           value={selectedTool}
           onChange={(e) => setSelectedTool(e.target.value)}
@@ -192,7 +323,6 @@ export default function Home() {
         </Select>
       </VStack>
 
-      {/* Tool UI */}
       <ToolUI
         title={tools[selectedTool].title}
         fields={tools[selectedTool].fields}
