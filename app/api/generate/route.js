@@ -1,72 +1,43 @@
 const cache = new Map();
 
 export async function POST(req) {
+  const { prompt } = await req.json();
+
   try {
-    const { prompt } = await req.json();
-
-    if (!prompt) {
-      return Response.json({ result: "No prompt provided" }, { status: 400 });
-    }
-
     if (cache.has(prompt)) {
       return Response.json({ result: cache.get(prompt) });
     }
 
-    const models = [
-      "poolside/laguna-xs.2:free",   // primary
-      "z-ai/glm-4.7-flash",          // fallback 1
-      "minimax/minimax-m2.5:free"    // fallback 2
-    ];
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "http://localhost:3000",
+        "X-Title": "My AI Tool"
+      },
+      body: JSON.stringify({
+        model: "poolside/laguna-xs.2:free",
+        messages: [
+          { role: "user", content: prompt }
+        ],
+        max_tokens: 200
+      })
+    });
 
-    let result = null;
-    let lastError = null;
+    const data = await response.json();
+    console.log("DATA:", data);
 
-    for (const model of models) {
-      try {
-        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`
-          },
-          body: JSON.stringify({
-            model,
-            messages: [{ role: "user", content: prompt }],
-            max_tokens: 200
-          })
-        });
-
-        const data = await response.json();
-
-        const content = data?.choices?.[0]?.message?.content?.trim();
-
-        if (content) {
-          result = content;
-          break; // ✅ success
-        } else {
-          lastError = data;
-        }
-
-      } catch (err) {
-        lastError = err;
-      }
-    }
-
-    if (!result) {
-      return Response.json({
-        result: "All models failed",
-        debug: lastError
-      });
-    }
+    const result =
+      data?.choices?.[0]?.message?.content ||
+      data?.choices?.[0]?.message?.reasoning ||
+      "No response";
 
     cache.set(prompt, result);
 
     return Response.json({ result });
 
   } catch (error) {
-    return Response.json({
-      result: "Server Error",
-      error: error.message
-    }, { status: 500 });
+    return Response.json({ result: "API Error" }, { status: 500 });
   }
 }
