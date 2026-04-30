@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import ToolUI from "./components/ToolUI";
-import { Typewriter } from "react-simple-typewriter";
 import {
   Box,
   VStack,
@@ -142,23 +141,11 @@ export default function Home() {
           ✨ AI Multi-Tool Suite
         </Heading>
 
-        {/* TYPEWRITER */}
+        {/* STATIC TEXT (NO TYPEWRITER) */}
         <Text fontSize="md" color="gray.500">
-          <Typewriter
-            words={[
-              "Build Logos ⚡",
-              "Write Blogs 📝",
-              "Generate Ads 🎯",
-              "AI Tools Made Easy 🚀",
-            ]}
-            loop={0}
-            cursor
-            cursorStyle="|"
-            typeSpeed={70}
-            deleteSpeed={40}
-            delaySpeed={1200}
-          />
+          Build Logos ⚡ | Write Blogs 📝 | Generate Ads 🎯 | AI Tools Made Easy 🚀
         </Text>
+
       </VStack>
 
       <Divider mb={6} />
