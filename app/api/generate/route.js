@@ -1,67 +1,81 @@
 export async function POST(req) {
-  const { prompt } = await req.json();
+  try {
+    const { prompt } = await req.json();
 
-  if (!prompt) {
-    return new Response("No prompt", { status: 400 });
-  }
+    if (!prompt) {
+      return new Response("No prompt provided", { status: 400 });
+    }
 
-  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: "qwen/qwen3.5-plus-2026-02-15",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.7,
-      max_tokens: 1500,
-      stream: true, // 🔥 KEY
-    }),
-  });
+    console.log("Streaming API HIT");
 
-  const encoder = new TextEncoder();
-  const decoder = new TextDecoder();
+    const aiRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "qwen/qwen3.5-plus",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7,
+        max_tokens: 1500,
+        stream: true,
+      }),
+    });
 
-  const stream = new ReadableStream({
-    async start(controller) {
-      const reader = response.body.getReader();
+    if (!aiRes.body) {
+      return new Response("No stream received from AI", { status: 500 });
+    }
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
 
-        const chunk = decoder.decode(value);
-        const lines = chunk.split("\n");
+    const stream = new ReadableStream({
+      async start(controller) {
+        const reader = aiRes.body.getReader();
 
-        for (let line of lines) {
-          if (line.startsWith("data: ")) {
-            const json = line.replace("data: ", "").trim();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-            if (json === "[DONE]") {
-              controller.close();
-              return;
-            }
+          const chunk = decoder.decode(value);
+          const lines = chunk.split("\n");
 
-            try {
-              const parsed = JSON.parse(json);
-              const content = parsed.choices?.[0]?.delta?.content;
+          for (let line of lines) {
+            if (line.startsWith("data: ")) {
+              const json = line.replace("data: ", "").trim();
 
-              if (content) {
-                controller.enqueue(encoder.encode(content));
+              if (json === "[DONE]") {
+                controller.close();
+                return;
               }
-            } catch {}
+
+              try {
+                const parsed = JSON.parse(json);
+                const content = parsed.choices?.[0]?.delta?.content;
+
+                if (content) {
+                  controller.enqueue(encoder.encode(content));
+                }
+              } catch (err) {
+                console.log("Parse error", err);
+              }
+            }
           }
         }
-      }
 
-      controller.close();
-    },
-  });
+        controller.close();
+      },
+    });
 
-  return new Response(stream, {
-    headers: {
-      "Content-Type": "text/plain; charset=utf-8",
-    },
-  });
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+      },
+    });
+
+  } catch (err) {
+    console.error(err);
+    return new Response("Server error", { status: 500 });
+  }
 }
