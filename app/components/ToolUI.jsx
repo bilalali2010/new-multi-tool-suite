@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import {
   Box,
@@ -13,92 +15,76 @@ export default function ToolUI({ title, fields, promptTemplate }) {
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // =============================
+  // HANDLE INPUT CHANGE
+  // =============================
   const handleChange = (name, value) => {
-    setForm({ ...form, [name]: value });
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // =============================
+  // BUILD PROMPT
+  // =============================
   const buildPrompt = () => {
     let prompt = promptTemplate;
 
     Object.keys(form).forEach((key) => {
-      prompt = prompt.replace(`{{${key}}}`, form[key]);
+      prompt = prompt.replace(`{{${key}}}`, form[key] || "");
     });
 
     return prompt;
   };
 
-  // 🚀 STREAM FUNCTION
-  const streamResponse = async (prompt) => {
-    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+  // =============================
+  // CALL BACKEND API (FIXED)
+  // =============================
+  const generateResponse = async (prompt) => {
+    const res = await fetch("/api/generate", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        model: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 1500,
-        temperature: 0.7,
-        stream: true,
-      }),
+      body: JSON.stringify({ prompt }),
     });
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder("utf-8");
+    const data = await res.json();
 
-    let fullText = "";
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      const chunk = decoder.decode(value, { stream: true });
-
-      const lines = chunk.split("\n");
-
-      for (let line of lines) {
-        if (line.startsWith("data: ")) {
-          const json = line.replace("data: ", "").trim();
-
-          if (json === "[DONE]") break;
-
-          try {
-            const parsed = JSON.parse(json);
-            const content = parsed.choices?.[0]?.delta?.content;
-
-            if (content) {
-              fullText += content;
-              setResult(fullText); // 🔥 live update
-            }
-          } catch (err) {}
-        }
-      }
+    if (!res.ok) {
+      throw new Error(data.error || "Failed to generate response");
     }
 
-    // 🔁 AUTO CONTINUE
-    if (
-      !fullText.trim().endsWith(".") &&
-      fullText.length > 300
-    ) {
-      await streamResponse(fullText + "\nContinue writing.");
-    }
+    return data.result;
   };
 
+  // =============================
+  // GENERATE HANDLER
+  // =============================
   const handleGenerate = async () => {
-    setLoading(true);
-    setResult("");
+    try {
+      setLoading(true);
+      setResult("");
 
-    const prompt = buildPrompt();
+      const prompt = buildPrompt();
 
-    await streamResponse(prompt);
+      const output = await generateResponse(prompt);
 
-    setLoading(false);
+      setResult(output);
+    } catch (err) {
+      console.error(err);
+      setResult("❌ Error: " + err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // =============================
+  // UI
+  // =============================
   return (
     <Box>
       <VStack spacing={3} align="stretch">
+
+        {/* INPUT FIELDS */}
         {fields.map((field) =>
           field.type === "textarea" ? (
             <Textarea
@@ -115,6 +101,7 @@ export default function ToolUI({ title, fields, promptTemplate }) {
           )
         )}
 
+        {/* GENERATE BUTTON */}
         <Button
           colorScheme="teal"
           onClick={handleGenerate}
@@ -123,9 +110,17 @@ export default function ToolUI({ title, fields, promptTemplate }) {
           Generate
         </Button>
 
-        <Text whiteSpace="pre-wrap">
-          {result}
-        </Text>
+        {/* RESULT OUTPUT */}
+        <Box
+          bg="gray.50"
+          p={4}
+          borderRadius="md"
+          minH="120px"
+          whiteSpace="pre-wrap"
+        >
+          {loading ? "⏳ Generating..." : result || "Your result will appear here..."}
+        </Box>
+
       </VStack>
     </Box>
   );
