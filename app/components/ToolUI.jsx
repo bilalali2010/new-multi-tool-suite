@@ -1,179 +1,132 @@
-"use client";
-
 import { useState } from "react";
 import {
   Box,
+  Button,
   Input,
   Textarea,
-  Select,
-  NumberInput,
-  NumberInputField,
+  Text,
   VStack,
-  HStack,
-  FormLabel,
-  Button,
-  Heading,
-  Collapse,
-  IconButton,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
-  Tooltip,
 } from "@chakra-ui/react";
-import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 
-export default function ToolUI({ title, fields = [], promptTemplate }) {
-  const [values, setValues] = useState(
-    fields.reduce((acc, f) => ({ ...acc, [f.name]: f.default || "" }), {})
-  );
-  const [output, setOutput] = useState("");
+export default function ToolUI({ title, fields, promptTemplate }) {
+  const [form, setForm] = useState({});
+  const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
 
-  const handleChange = (name, value) => setValues({ ...values, [name]: value });
+  const handleChange = (name, value) => {
+    setForm({ ...form, [name]: value });
+  };
 
-  const generate = async () => {
+  const buildPrompt = () => {
     let prompt = promptTemplate;
-    Object.keys(values).forEach((key) => {
-      prompt = prompt.replace(`{{${key}}}`, values[key]);
+
+    Object.keys(form).forEach((key) => {
+      prompt = prompt.replace(`{{${key}}}`, form[key]);
     });
 
-    setLoading(true);
-    setOutput("");
+    return prompt;
+  };
 
-    try {
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
-      });
-      const data = await res.json();
-      setOutput(data.result || "Error generating response");
-    } catch (err) {
-      setOutput("Server error");
-    } finally {
-      setLoading(false);
+  // 🚀 STREAM FUNCTION
+  const streamResponse = async (prompt) => {
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 1500,
+        temperature: 0.7,
+        stream: true,
+      }),
+    });
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder("utf-8");
+
+    let fullText = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+
+      const lines = chunk.split("\n");
+
+      for (let line of lines) {
+        if (line.startsWith("data: ")) {
+          const json = line.replace("data: ", "").trim();
+
+          if (json === "[DONE]") break;
+
+          try {
+            const parsed = JSON.parse(json);
+            const content = parsed.choices?.[0]?.delta?.content;
+
+            if (content) {
+              fullText += content;
+              setResult(fullText); // 🔥 live update
+            }
+          } catch (err) {}
+        }
+      }
+    }
+
+    // 🔁 AUTO CONTINUE
+    if (
+      !fullText.trim().endsWith(".") &&
+      fullText.length > 300
+    ) {
+      await streamResponse(fullText + "\nContinue writing.");
     }
   };
 
+  const handleGenerate = async () => {
+    setLoading(true);
+    setResult("");
+
+    const prompt = buildPrompt();
+
+    await streamResponse(prompt);
+
+    setLoading(false);
+  };
+
   return (
-    <Box maxW="5xl" mx="auto" p={6} bg="white" borderRadius="2xl" boxShadow="2xl">
-      {/* Header */}
-      <HStack justify="space-between" mb={4}>
-        <Heading size="lg">{title}</Heading>
-        <IconButton
-          icon={collapsed ? <ChevronDownIcon /> : <ChevronUpIcon />}
-          onClick={() => setCollapsed(!collapsed)}
-          aria-label="Toggle Inputs"
-          variant="ghost"
-        />
-      </HStack>
+    <Box>
+      <VStack spacing={3} align="stretch">
+        {fields.map((field) =>
+          field.type === "textarea" ? (
+            <Textarea
+              key={field.name}
+              placeholder={field.label}
+              onChange={(e) => handleChange(field.name, e.target.value)}
+            />
+          ) : (
+            <Input
+              key={field.name}
+              placeholder={field.label}
+              onChange={(e) => handleChange(field.name, e.target.value)}
+            />
+          )
+        )}
 
-      {/* Collapsible Input Panel */}
-      <Collapse in={!collapsed} animateOpacity>
-        <Tabs variant="enclosed-colored" colorScheme="teal">
-          <TabList mb={2}>
-            <Tab>Inputs</Tab>
-            {fields.some((f) => f.type === "select") && <Tab>Options</Tab>}
-          </TabList>
-
-          <TabPanels>
-            {/* Inputs Tab */}
-            <TabPanel>
-              <VStack spacing={4} align="stretch">
-                {fields.map((f) => (
-                  <Box key={f.name}>
-                    <FormLabel>{f.label}</FormLabel>
-                    {f.type === "text" && (
-                      <Input
-                        placeholder={f.placeholder}
-                        value={values[f.name]}
-                        onChange={(e) => handleChange(f.name, e.target.value)}
-                      />
-                    )}
-                    {f.type === "textarea" && (
-                      <Textarea
-                        placeholder={f.placeholder}
-                        value={values[f.name]}
-                        onChange={(e) => handleChange(f.name, e.target.value)}
-                        rows={4}
-                      />
-                    )}
-                    {f.type === "number" && (
-                      <NumberInput
-                        value={values[f.name]}
-                        min={f.min}
-                        max={f.max}
-                        onChange={(val) => handleChange(f.name, val)}
-                      >
-                        <NumberInputField />
-                      </NumberInput>
-                    )}
-                  </Box>
-                ))}
-              </VStack>
-            </TabPanel>
-
-            {/* Options Tab */}
-            <TabPanel>
-              <VStack spacing={4} align="stretch">
-                {fields
-                  .filter((f) => f.type === "select")
-                  .map((f) => (
-                    <Box key={f.name}>
-                      <FormLabel>{f.label}</FormLabel>
-                      <Select
-                        value={values[f.name]}
-                        onChange={(e) => handleChange(f.name, e.target.value)}
-                      >
-                        {f.options.map((o) => (
-                          <option key={o} value={o}>
-                            {o}
-                          </option>
-                        ))}
-                      </Select>
-                    </Box>
-                  ))}
-              </VStack>
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
-      </Collapse>
-
-      {/* Action Buttons */}
-      <HStack spacing={4} mt={6} mb={4}>
         <Button
-          bgGradient="linear(to-r, teal.400, green.400)"
-          color="white"
-          _hover={{ bgGradient: "linear(to-r, teal.500, green.500)" }}
-          onClick={generate}
+          colorScheme="teal"
+          onClick={handleGenerate}
           isLoading={loading}
         >
           Generate
         </Button>
-        <Tooltip label="Copy output to clipboard" placement="top">
-          <Button onClick={() => navigator.clipboard.writeText(output)} disabled={!output}>
-            Copy Output
-          </Button>
-        </Tooltip>
-      </HStack>
 
-      {/* Output Panel */}
-      {output && (
-        <Box
-          mt={4}
-          p={6}
-          bg="gray.50"
-          borderRadius="xl"
-          whiteSpace="pre-wrap"
-          maxH="400px"
-          overflowY="auto"
-        >
-          {output}
-        </Box>
-      )}
+        <Text whiteSpace="pre-wrap">
+          {result}
+        </Text>
+      </VStack>
     </Box>
   );
 }
