@@ -1,81 +1,122 @@
-export async function POST(req) {
-  try {
-    const { prompt } = await req.json();
+"use client";
 
-    if (!prompt) {
-      return new Response("No prompt provided", { status: 400 });
-    }
+import { useState } from "react";
+import {
+  Box,
+  Button,
+  Input,
+  Textarea,
+  VStack,
+} from "@chakra-ui/react";
 
-    console.log("Streaming API HIT");
+export default function ToolUI({ fields, promptTemplate }) {
+  const [form, setForm] = useState({});
+  const [result, setResult] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    const aiRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+  const handleChange = (name, value) => {
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const buildPrompt = () => {
+    let prompt = promptTemplate;
+
+    Object.keys(form).forEach((key) => {
+      prompt = prompt.replace(`{{${key}}}`, form[key] || "");
+    });
+
+    return prompt;
+  };
+
+  // 🔥 STREAM FROM BACKEND
+  const streamResponse = async (prompt) => {
+    const res = await fetch("/api/generate", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
       },
-      body: JSON.stringify({
-        model: "qwen/qwen3.5-plus",
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.7,
-        max_tokens: 1500,
-        stream: true,
-      }),
+      body: JSON.stringify({ prompt }),
     });
 
-    if (!aiRes.body) {
-      return new Response("No stream received from AI", { status: 500 });
+    if (!res.body) {
+      throw new Error("No stream received");
     }
 
-    const encoder = new TextEncoder();
+    const reader = res.body.getReader();
     const decoder = new TextDecoder();
 
-    const stream = new ReadableStream({
-      async start(controller) {
-        const reader = aiRes.body.getReader();
+    let fullText = "";
 
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
+    while (true) {
+      const { done, value } = await reader.read();
 
-          const chunk = decoder.decode(value);
-          const lines = chunk.split("\n");
+      if (done) break;
 
-          for (let line of lines) {
-            if (line.startsWith("data: ")) {
-              const json = line.replace("data: ", "").trim();
+      const chunk = decoder.decode(value || new Uint8Array());
 
-              if (json === "[DONE]") {
-                controller.close();
-                return;
-              }
+      fullText += chunk;
 
-              try {
-                const parsed = JSON.parse(json);
-                const content = parsed.choices?.[0]?.delta?.content;
+      // 🔥 IMPORTANT (fix UI not updating)
+      setResult((prev) => prev + chunk);
+    }
+  };
 
-                if (content) {
-                  controller.enqueue(encoder.encode(content));
-                }
-              } catch (err) {
-                console.log("Parse error", err);
-              }
-            }
-          }
-        }
+  const handleGenerate = async () => {
+    try {
+      setLoading(true);
+      setResult("");
 
-        controller.close();
-      },
-    });
+      const prompt = buildPrompt();
 
-    return new Response(stream, {
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-      },
-    });
+      await streamResponse(prompt);
 
-  } catch (err) {
-    console.error(err);
-    return new Response("Server error", { status: 500 });
-  }
+    } catch (err) {
+      console.error(err);
+      setResult("❌ Error: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Box>
+      <VStack spacing={3} align="stretch">
+
+        {fields.map((field) =>
+          field.type === "textarea" ? (
+            <Textarea
+              key={field.name}
+              placeholder={field.label}
+              onChange={(e) => handleChange(field.name, e.target.value)}
+            />
+          ) : (
+            <Input
+              key={field.name}
+              placeholder={field.label}
+              onChange={(e) => handleChange(field.name, e.target.value)}
+            />
+          )
+        )}
+
+        <Button
+          colorScheme="teal"
+          onClick={handleGenerate}
+          isLoading={loading}
+        >
+          Generate
+        </Button>
+
+        <Box
+          bg="gray.50"
+          p={4}
+          borderRadius="md"
+          minH="120px"
+          whiteSpace="pre-wrap"
+        >
+          {loading ? "⚡ Generating..." : result || "Result will appear here"}
+        </Box>
+
+      </VStack>
+    </Box>
+  );
 }
