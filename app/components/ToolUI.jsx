@@ -15,16 +15,10 @@ export default function ToolUI({ title, fields, promptTemplate }) {
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // =============================
-  // HANDLE INPUT CHANGE
-  // =============================
   const handleChange = (name, value) => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // =============================
-  // BUILD PROMPT
-  // =============================
   const buildPrompt = () => {
     let prompt = promptTemplate;
 
@@ -35,10 +29,8 @@ export default function ToolUI({ title, fields, promptTemplate }) {
     return prompt;
   };
 
-  // =============================
-  // CALL BACKEND API (FIXED)
-  // =============================
-  const generateResponse = async (prompt) => {
+  // 🚀 STREAM FROM BACKEND
+  const streamResponse = async (prompt) => {
     const res = await fetch("/api/generate", {
       method: "POST",
       headers: {
@@ -47,18 +39,23 @@ export default function ToolUI({ title, fields, promptTemplate }) {
       body: JSON.stringify({ prompt }),
     });
 
-    const data = await res.json();
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder("utf-8");
 
-    if (!res.ok) {
-      throw new Error(data.error || "Failed to generate response");
+    let fullText = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+
+      fullText += chunk;
+
+      setResult(fullText); // ⚡ live typing
     }
-
-    return data.result;
   };
 
-  // =============================
-  // GENERATE HANDLER
-  // =============================
   const handleGenerate = async () => {
     try {
       setLoading(true);
@@ -66,9 +63,7 @@ export default function ToolUI({ title, fields, promptTemplate }) {
 
       const prompt = buildPrompt();
 
-      const output = await generateResponse(prompt);
-
-      setResult(output);
+      await streamResponse(prompt);
     } catch (err) {
       console.error(err);
       setResult("❌ Error: " + err.message);
@@ -77,14 +72,10 @@ export default function ToolUI({ title, fields, promptTemplate }) {
     }
   };
 
-  // =============================
-  // UI
-  // =============================
   return (
     <Box>
       <VStack spacing={3} align="stretch">
 
-        {/* INPUT FIELDS */}
         {fields.map((field) =>
           field.type === "textarea" ? (
             <Textarea
@@ -101,7 +92,6 @@ export default function ToolUI({ title, fields, promptTemplate }) {
           )
         )}
 
-        {/* GENERATE BUTTON */}
         <Button
           colorScheme="teal"
           onClick={handleGenerate}
@@ -110,7 +100,6 @@ export default function ToolUI({ title, fields, promptTemplate }) {
           Generate
         </Button>
 
-        {/* RESULT OUTPUT */}
         <Box
           bg="gray.50"
           p={4}
@@ -118,7 +107,7 @@ export default function ToolUI({ title, fields, promptTemplate }) {
           minH="120px"
           whiteSpace="pre-wrap"
         >
-          {loading ? "⏳ Generating..." : result || "Your result will appear here..."}
+          {loading ? "⚡ Generating..." : result || "Result will appear here"}
         </Box>
 
       </VStack>
