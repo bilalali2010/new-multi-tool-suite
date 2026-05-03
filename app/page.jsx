@@ -7,8 +7,6 @@ import {
   Flex,
   Heading,
   Text,
-  Input,
-  VStack,
   SimpleGrid,
   Button,
   Badge,
@@ -23,91 +21,30 @@ import {
 } from "@chakra-ui/react";
 
 // ==============================
-// 16 TOOLS (FULL NAMES RESTORED)
+// 16 AI TOOLS
 // ==============================
 const tools = {
-  blog: {
-    title: "📝 AI Blog Generator",
-    fields: [{ name: "topic", label: "Topic", type: "text" }],
-    basePrompt: "Write a high-quality blog about {{topic}}",
-  },
-  email: {
-    title: "📧 Email Writer",
-    fields: [{ name: "purpose", label: "Purpose", type: "text" }],
-    basePrompt: "Write a professional email for {{purpose}}",
-  },
-  rewriter: {
-    title: "✍️ Text Rewriter",
-    fields: [{ name: "text", label: "Text", type: "textarea" }],
-    basePrompt: "Rewrite: {{text}}",
-  },
-  notes: {
-    title: "📚 Notes Summarizer",
-    fields: [{ name: "text", label: "Text", type: "textarea" }],
-    basePrompt: "Summarize: {{text}}",
-  },
-  caption: {
-    title: "📱 Caption Writer",
-    fields: [{ name: "description", label: "Post", type: "text" }],
-    basePrompt: "Write viral captions for {{description}}",
-  },
-  adcopy: {
-    title: "📢 Ad Copy Generator",
-    fields: [{ name: "product", label: "Product", type: "text" }],
-    basePrompt: "Write high-converting ad copy for {{product}}",
-  },
-  seo: {
-    title: "🔍 SEO Keyword Generator",
-    fields: [{ name: "topic", label: "Topic", type: "text" }],
-    basePrompt: "Generate SEO keywords for {{topic}}",
-  },
-  logo: {
-    title: "🎨 Logo Idea Generator",
-    fields: [{ name: "brandName", label: "Brand Name", type: "text" }],
-    basePrompt: "Generate modern logo ideas for {{brandName}}",
-  },
-  chatbot: {
-    title: "🤖 AI Chatbot Assistant",
-    fields: [{ name: "message", label: "Message", type: "textarea" }],
-    basePrompt: "Act as a smart assistant and reply to: {{message}}",
-  },
-  resume: {
-    title: "📄 Resume Builder",
-    fields: [{ name: "details", label: "Details", type: "textarea" }],
-    basePrompt: "Create ATS-friendly resume from: {{details}}",
-  },
-  youtube: {
-    title: "🎥 YouTube Script Writer",
-    fields: [{ name: "idea", label: "Video Idea", type: "text" }],
-    basePrompt: "Write viral YouTube script about: {{idea}}",
-  },
-  code: {
-    title: "💻 Code Generator",
-    fields: [{ name: "task", label: "Task", type: "textarea" }],
-    basePrompt: "Generate clean optimized code for: {{task}}",
-  },
-  story: {
-    title: "📖 Story Generator",
-    fields: [{ name: "idea", label: "Story Idea", type: "text" }],
-    basePrompt: "Write a creative story about: {{idea}}",
-  },
-  interview: {
-    title: "🧠 Interview Q&A Generator",
-    fields: [{ name: "role", label: "Job Role", type: "text" }],
-    basePrompt: "Generate interview Q&A for: {{role}}",
-  },
-  product: {
-    title: "🛍️ Product Description Writer",
-    fields: [{ name: "product", label: "Product", type: "text" }],
-    basePrompt: "Write persuasive product description for: {{product}}",
-  },
-  social: {
-    title: "📊 Social Media Post Generator",
-    fields: [{ name: "topic", label: "Topic", type: "text" }],
-    basePrompt: "Create engaging social posts about: {{topic}}",
-  },
+  blog: { title: "📝 AI Blog Generator", fields: [{ name: "topic", label: "Topic", type: "text" }], basePrompt: "Write a blog about {{topic}}" },
+  email: { title: "📧 Email Writer", fields: [{ name: "purpose", label: "Purpose", type: "text" }], basePrompt: "Write an email for {{purpose}}" },
+  rewriter: { title: "✍️ Text Rewriter", fields: [{ name: "text", label: "Text", type: "textarea" }], basePrompt: "Rewrite: {{text}}" },
+  notes: { title: "📚 Notes Summarizer", fields: [{ name: "text", label: "Text", type: "textarea" }], basePrompt: "Summarize: {{text}}" },
+  caption: { title: "📱 Caption Writer", fields: [{ name: "description", label: "Post", type: "text" }], basePrompt: "Write captions for {{description}}" },
+  adcopy: { title: "📢 Ad Copy Generator", fields: [{ name: "product", label: "Product", type: "text" }], basePrompt: "Write ad copy for {{product}}" },
+  seo: { title: "🔍 SEO Generator", fields: [{ name: "topic", label: "Topic", type: "text" }], basePrompt: "Generate SEO keywords for {{topic}}" },
+  logo: { title: "🎨 Logo Generator", fields: [{ name: "brandName", label: "Brand Name", type: "text" }], basePrompt: "Generate logo ideas for {{brandName}}" },
+  chatbot: { title: "🤖 AI Chatbot", fields: [{ name: "message", label: "Message", type: "textarea" }], basePrompt: "Reply to: {{message}}" },
+  resume: { title: "📄 Resume Builder", fields: [{ name: "details", label: "Details", type: "textarea" }], basePrompt: "Build resume from {{details}}" },
+  youtube: { title: "🎥 YouTube Script", fields: [{ name: "idea", label: "Idea", type: "text" }], basePrompt: "Write script about {{idea}}" },
+  code: { title: "💻 Code Generator", fields: [{ name: "task", label: "Task", type: "textarea" }], basePrompt: "Generate code for {{task}}" },
+  story: { title: "📖 Story Generator", fields: [{ name: "idea", label: "Idea", type: "text" }], basePrompt: "Write story about {{idea}}" },
+  interview: { title: "🧠 Interview Q&A", fields: [{ name: "role", label: "Role", type: "text" }], basePrompt: "Interview Q&A for {{role}}" },
+  product: { title: "🛍️ Product Description", fields: [{ name: "product", label: "Product", type: "text" }], basePrompt: "Describe {{product}}" },
+  social: { title: "📊 Social Media Posts", fields: [{ name: "topic", label: "Topic", type: "text" }], basePrompt: "Create posts about {{topic}}" },
 };
 
+// ==============================
+// CONTROLS
+// ==============================
 const controlOptions = {
   type: ["Informative", "Creative", "Persuasive", "Professional"],
   tone: ["Friendly", "Formal", "Funny", "Sales"],
@@ -128,7 +65,7 @@ export default function Home() {
   });
 
   // ==============================
-  // 🚀 OPEN TOOL SELECTOR ON START
+  // OPEN TOOL SELECTOR ON START
   // ==============================
   useEffect(() => {
     onOpen();
@@ -146,6 +83,13 @@ TASK:
 ${tool.basePrompt}
 `;
 
+  // ==============================
+  // 🔄 CHANGE TOOL BUTTON FUNCTION
+  // ==============================
+  const openToolSelector = () => {
+    onOpen();
+  };
+
   return (
     <Flex minH="100vh" bg="gray.50">
 
@@ -153,7 +97,7 @@ ${tool.basePrompt}
       <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Select a Tool to Start 🚀</ModalHeader>
+          <ModalHeader>Select a Tool 🚀</ModalHeader>
           <ModalBody pb={6}>
             <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3}>
               {Object.keys(tools).map((key) => (
@@ -177,7 +121,14 @@ ${tool.basePrompt}
       {/* ================= MAIN ================= */}
       <Box flex="1" p={{ base: 3, md: 6 }} maxW="1100px" mx="auto" w="100%">
 
-        <Flex justify="space-between" align="center" mb={4}>
+        {/* HEADER */}
+        <Flex
+          justify="space-between"
+          align="center"
+          mb={4}
+          flexWrap="wrap"
+          gap={2}
+        >
           <Box>
             <Heading size="md">{currentTool.title}</Heading>
             <Text fontSize="sm" color="gray.500">
@@ -185,7 +136,19 @@ ${tool.basePrompt}
             </Text>
           </Box>
 
-          <Badge colorScheme="green">PRO</Badge>
+          <Flex gap={2} align="center">
+            {/* 🔄 CHANGE TOOL BUTTON */}
+            <Button
+              size="sm"
+              variant="outline"
+              colorScheme="teal"
+              onClick={openToolSelector}
+            >
+              🔄 Change Tool
+            </Button>
+
+            <Badge colorScheme="green">PRO</Badge>
+          </Flex>
         </Flex>
 
         <Divider mb={4} />
