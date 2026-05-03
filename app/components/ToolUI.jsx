@@ -1,116 +1,81 @@
-"use client";
+export async function POST(req) {
+  try {
+    const { prompt } = await req.json();
 
-import { useState } from "react";
-import {
-  Box,
-  Button,
-  Input,
-  Textarea,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
+    if (!prompt) {
+      return new Response("No prompt provided", { status: 400 });
+    }
 
-export default function ToolUI({ title, fields, promptTemplate }) {
-  const [form, setForm] = useState({});
-  const [result, setResult] = useState("");
-  const [loading, setLoading] = useState(false);
+    console.log("Streaming API HIT");
 
-  const handleChange = (name, value) => {
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const buildPrompt = () => {
-    let prompt = promptTemplate;
-
-    Object.keys(form).forEach((key) => {
-      prompt = prompt.replace(`{{${key}}}`, form[key] || "");
-    });
-
-    return prompt;
-  };
-
-  // 🚀 STREAM FROM BACKEND
-  const streamResponse = async (prompt) => {
-    const res = await fetch("/api/generate", {
+    const aiRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
       },
-      body: JSON.stringify({ prompt }),
+      body: JSON.stringify({
+        model: "qwen/qwen3.5-plus",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7,
+        max_tokens: 1500,
+        stream: true,
+      }),
     });
 
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder("utf-8");
-
-    let fullText = "";
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      const chunk = decoder.decode(value, { stream: true });
-
-      fullText += chunk;
-
-      setResult(fullText); // ⚡ live typing
+    if (!aiRes.body) {
+      return new Response("No stream received from AI", { status: 500 });
     }
-  };
 
-  const handleGenerate = async () => {
-    try {
-      setLoading(true);
-      setResult("");
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
 
-      const prompt = buildPrompt();
+    const stream = new ReadableStream({
+      async start(controller) {
+        const reader = aiRes.body.getReader();
 
-      await streamResponse(prompt);
-    } catch (err) {
-      console.error(err);
-      setResult("❌ Error: " + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-  return (
-    <Box>
-      <VStack spacing={3} align="stretch">
+          const chunk = decoder.decode(value);
+          const lines = chunk.split("\n");
 
-        {fields.map((field) =>
-          field.type === "textarea" ? (
-            <Textarea
-              key={field.name}
-              placeholder={field.label}
-              onChange={(e) => handleChange(field.name, e.target.value)}
-            />
-          ) : (
-            <Input
-              key={field.name}
-              placeholder={field.label}
-              onChange={(e) => handleChange(field.name, e.target.value)}
-            />
-          )
-        )}
+          for (let line of lines) {
+            if (line.startsWith("data: ")) {
+              const json = line.replace("data: ", "").trim();
 
-        <Button
-          colorScheme="teal"
-          onClick={handleGenerate}
-          isLoading={loading}
-        >
-          Generate
-        </Button>
+              if (json === "[DONE]") {
+                controller.close();
+                return;
+              }
 
-        <Box
-          bg="gray.50"
-          p={4}
-          borderRadius="md"
-          minH="120px"
-          whiteSpace="pre-wrap"
-        >
-          {loading ? "⚡ Generating..." : result || "Result will appear here"}
-        </Box>
+              try {
+                const parsed = JSON.parse(json);
+                const content = parsed.choices?.[0]?.delta?.content;
 
-      </VStack>
-    </Box>
-  );
+                if (content) {
+                  controller.enqueue(encoder.encode(content));
+                }
+              } catch (err) {
+                console.log("Parse error", err);
+              }
+            }
+          }
+        }
+
+        controller.close();
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+      },
+    });
+
+  } catch (err) {
+    console.error(err);
+    return new Response("Server error", { status: 500 });
+  }
 }
