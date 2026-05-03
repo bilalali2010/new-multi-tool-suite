@@ -24,39 +24,37 @@ import {
 import { HamburgerIcon } from "@chakra-ui/icons";
 
 // ==============================
-// 🚀 ALL HIGH-DEMAND AI TOOLS
+// 🚀 FINAL 12 HIGH-DEMAND AI TOOLS
 // ==============================
 const tools = {
-  // ===== WRITING =====
   blog: {
     title: "📝 AI Blog Generator",
     fields: [{ label: "Topic", name: "topic", type: "text" }],
-    basePrompt: "Write a high-quality blog about {{topic}}",
+    basePrompt: "Write a blog about {{topic}}",
   },
 
   email: {
     title: "📧 Email Writer",
     fields: [{ label: "Purpose", name: "purpose", type: "text" }],
-    basePrompt: "Write a professional email for {{purpose}}",
+    basePrompt: "Write an email for {{purpose}}",
   },
 
   rewriter: {
     title: "✍️ Text Rewriter",
     fields: [{ label: "Text", name: "text", type: "textarea" }],
-    basePrompt: "Rewrite this text: {{text}}",
+    basePrompt: "Rewrite: {{text}}",
   },
 
   notes: {
-    title: "📚 Study Notes Summarizer",
+    title: "📚 Notes Summarizer",
     fields: [{ label: "Text", name: "text", type: "textarea" }],
-    basePrompt: "Summarize and simplify: {{text}}",
+    basePrompt: "Summarize: {{text}}",
   },
 
-  // ===== MARKETING =====
   caption: {
-    title: "📱 Social Caption Writer",
+    title: "📱 Caption Writer",
     fields: [{ label: "Post", name: "description", type: "text" }],
-    basePrompt: "Write viral captions for {{description}}",
+    basePrompt: "Write captions for {{description}}",
   },
 
   adcopy: {
@@ -65,69 +63,53 @@ const tools = {
     basePrompt: "Write high-converting ad copy for {{product}}",
   },
 
-  landing: {
-    title: "🎯 Landing Page Generator",
-    fields: [{ label: "Product", name: "product", type: "text" }],
-    basePrompt: "Create landing page copy for {{product}}",
-  },
-
-  coldemail: {
-    title: "📨 Cold Email Outreach",
-    fields: [{ label: "Offer", name: "offer", type: "text" }],
-    basePrompt: "Write cold outreach email for {{offer}}",
-  },
-
-  linkedin: {
-    title: "💼 LinkedIn Post Generator",
-    fields: [{ label: "Topic", name: "topic", type: "text" }],
-    basePrompt: "Write viral LinkedIn post about {{topic}}",
-  },
-
   seo: {
     title: "🔍 SEO Keyword Generator",
     fields: [{ label: "Topic", name: "topic", type: "text" }],
     basePrompt: "Generate SEO keywords for {{topic}}",
   },
 
-  // ===== BUSINESS =====
-  businessplan: {
-    title: "📊 Business Plan Generator",
-    fields: [{ label: "Idea", name: "idea", type: "text" }],
-    basePrompt: "Create business plan for {{idea}}",
-  },
-
-  pitchdeck: {
-    title: "📈 Pitch Deck Creator",
-    fields: [{ label: "Startup", name: "startup", type: "text" }],
-    basePrompt: "Create startup pitch deck for {{startup}}",
-  },
-
-  jobdesc: {
-    title: "🧑‍💼 Job Description Generator",
-    fields: [{ label: "Role", name: "role", type: "text" }],
-    basePrompt: "Write job description for {{role}}",
-  },
-
-  workflow: {
-    title: "⚙️ AI Workflow Planner",
-    fields: [{ label: "Task", name: "task", type: "text" }],
-    basePrompt: "Break task into automation steps: {{task}}",
-  },
-
-  // ===== DESIGN =====
   logo: {
-    title: "🎨 Logo Generator",
+    title: "🎨 Logo Idea Generator",
     fields: [{ label: "Brand", name: "brandName", type: "text" }],
-    basePrompt: "Create logo ideas for {{brandName}}",
+    basePrompt: "Generate modern logo ideas for {{brandName}}",
+  },
+
+  // ==============================
+  // 🚀 NEW HIGH-DEMAND TOOLS ADDED
+  // ==============================
+
+  chatbot: {
+    title: "🤖 AI Chatbot",
+    fields: [{ label: "Message", name: "message", type: "textarea" }],
+    basePrompt: "Act as a smart AI assistant and respond to: {{message}}",
+  },
+
+  resume: {
+    title: "📄 Resume Builder",
+    fields: [{ label: "Details", name: "details", type: "textarea" }],
+    basePrompt: "Create a professional ATS-friendly resume from: {{details}}",
+  },
+
+  youtube: {
+    title: "🎥 YouTube Script Writer",
+    fields: [{ label: "Video Idea", name: "idea", type: "text" }],
+    basePrompt: "Write a viral YouTube video script about: {{idea}}",
+  },
+
+  code: {
+    title: "💻 Code Generator",
+    fields: [{ label: "Task", name: "task", type: "textarea" }],
+    basePrompt: "Generate clean, optimized code for: {{task}}",
   },
 };
 
 // ==============================
-// ⚙️ UNIVERSAL CONTROLS
+// ⚙️ CONTROLS
 // ==============================
 const controlOptions = {
   type: ["Informative", "Creative", "Persuasive", "Professional"],
-  tone: ["Friendly", "Formal", "Funny", "Sales", "Neutral"],
+  tone: ["Friendly", "Formal", "Funny", "Sales"],
   length: ["Short", "Medium", "Long"],
   style: ["Simple", "Advanced", "Viral"],
 };
@@ -148,7 +130,7 @@ export default function Home() {
   const currentTool = tools[selectedTool];
 
   // ==============================
-  // 🚀 PROMPT ENGINE
+  // PROMPT ENGINE
   // ==============================
   const buildPrompt = (tool) => `
 AI SYSTEM SETTINGS:
@@ -162,16 +144,17 @@ ${tool.basePrompt}
 `;
 
   // ==============================
-  // SIDEBAR COMPONENT
+  // SIDEBAR
   // ==============================
   const Sidebar = () => (
-    <VStack spacing={2} align="stretch">
+    <VStack spacing={2} align="stretch" maxH="80vh" overflowY="auto">
       {Object.keys(tools).map((key) => (
         <Button
           key={key}
           size="sm"
           variant={selectedTool === key ? "solid" : "ghost"}
           colorScheme="teal"
+          whiteSpace="normal"
           onClick={() => {
             setSelectedTool(key);
             onClose();
@@ -183,21 +166,11 @@ ${tool.basePrompt}
     </VStack>
   );
 
-  const filteredTools = Object.entries(tools).filter(([_, tool]) =>
-    tool.title.toLowerCase().includes(search.toLowerCase())
-  );
-
   return (
     <Flex minH="100vh" bg="gray.50">
 
-      {/* ================= DESKTOP SIDEBAR ================= */}
-      <Box
-        display={{ base: "none", md: "block" }}
-        w="260px"
-        bg="white"
-        borderRight="1px solid #eee"
-        p={4}
-      >
+      {/* DESKTOP SIDEBAR */}
+      <Box display={{ base: "none", md: "block" }} w="260px" bg="white" borderRight="1px solid #eee" p={4}>
         <Heading size="md" color="teal.500" mb={4}>
           ⚡ AI Studio Pro
         </Heading>
@@ -212,15 +185,8 @@ ${tool.basePrompt}
         <Sidebar />
       </Box>
 
-      {/* ================= MOBILE HEADER ================= */}
-      <Flex
-        display={{ base: "flex", md: "none" }}
-        p={4}
-        bg="white"
-        borderBottom="1px solid #eee"
-        justify="space-between"
-        align="center"
-      >
+      {/* MOBILE HEADER */}
+      <Flex display={{ base: "flex", md: "none" }} p={3} bg="white" borderBottom="1px solid #eee" justify="space-between" align="center">
         <Heading size="sm" color="teal.500">
           ⚡ AI Studio
         </Heading>
@@ -228,7 +194,7 @@ ${tool.basePrompt}
         <IconButton icon={<HamburgerIcon />} onClick={onOpen} />
       </Flex>
 
-      {/* ================= MOBILE DRAWER ================= */}
+      {/* MOBILE DRAWER */}
       <Drawer isOpen={isOpen} placement="left" onClose={onClose}>
         <DrawerOverlay />
         <DrawerContent>
@@ -238,15 +204,12 @@ ${tool.basePrompt}
         </DrawerContent>
       </Drawer>
 
-      {/* ================= MAIN AREA ================= */}
-      <Box flex="1" p={{ base: 4, md: 6 }}>
+      {/* MAIN AREA */}
+      <Box flex="1" p={{ base: 3, md: 6 }}>
 
-        {/* HEADER */}
         <Flex justify="space-between" align="center" mb={4}>
           <Box>
-            <Heading size="md">
-              {currentTool.title}
-            </Heading>
+            <Heading size="md">{currentTool.title}</Heading>
             <Text fontSize="sm" color="gray.500">
               Full SaaS AI Tool Platform
             </Text>
@@ -257,8 +220,8 @@ ${tool.basePrompt}
 
         <Divider mb={4} />
 
-        {/* ================= CONTROLS ================= */}
-        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3} mb={6}>
+        {/* CONTROLS */}
+        <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={3} mb={6}>
           {Object.keys(controlOptions).map((key) => (
             <Box key={key}>
               <Text fontSize="xs" fontWeight="bold" mb={1}>
@@ -282,13 +245,8 @@ ${tool.basePrompt}
           ))}
         </SimpleGrid>
 
-        {/* ================= TOOL ================= */}
-        <Box
-          bg="white"
-          p={{ base: 4, md: 6 }}
-          borderRadius="xl"
-          boxShadow="sm"
-        >
+        {/* TOOL UI */}
+        <Box bg="white" p={{ base: 3, md: 6 }} borderRadius="xl" boxShadow="sm">
           <ToolUI
             title={currentTool.title}
             fields={currentTool.fields}
