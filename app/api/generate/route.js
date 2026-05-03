@@ -1,21 +1,19 @@
 const cache = new Map();
 
-// 🧠 Smart model fallback chain (BEST → FAST → LIGHT)
 const MODELS = [
-  "openai/gpt-oss-120b",                 // 🥇 best quality
-  "qwen/qwen3.5-plus-2026-02-15",        // 🥈 balanced
-  "nvidia/nemotron-nano-9b-v2:free"      // 🥉 fast fallback
+  "openai/gpt-oss-120b",
+  "qwen/qwen3.5-plus-2026-02-15",
+  "nvidia/nemotron-nano-9b-v2:free",
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// 🔁 Single model call with retry
 async function callModel(model, prompt, attempt = 1) {
   const controller = new AbortController();
 
   const timeout = setTimeout(() => {
     controller.abort();
-  }, 15000); // 15s timeout
+  }, 25000);
 
   try {
     const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -28,7 +26,7 @@ async function callModel(model, prompt, attempt = 1) {
         model,
         messages: [{ role: "user", content: prompt }],
         temperature: 0.7,
-        max_tokens: 500,
+        max_tokens: 1500,
       }),
       signal: controller.signal,
     });
@@ -36,7 +34,6 @@ async function callModel(model, prompt, attempt = 1) {
     clearTimeout(timeout);
 
     const data = await res.json();
-
     const text = data?.choices?.[0]?.message?.content;
 
     if (!text) throw new Error("Empty response");
@@ -61,22 +58,44 @@ export async function POST(req) {
     return Response.json({ result: "No prompt provided" }, { status: 400 });
   }
 
-  // ⚡ Cache hit
-  if (cache.has(prompt)) {
+  const finalPrompt = `
+IMPORTANT:
+- Always complete the full response
+- Never stop mid-sentence
+- Ensure full structured output
+
+USER TASK:
+${prompt}
+`;
+
+  if (cache.has(finalPrompt)) {
     return Response.json({
-      result: cache.get(prompt),
+      result: cache.get(finalPrompt),
       cached: true,
     });
   }
 
   let lastError = null;
 
-  // 🔁 Try multiple models
   for (const model of MODELS) {
     try {
-      const result = await callModel(model, prompt);
+      let result = await callModel(model, finalPrompt);
 
-      cache.set(prompt, result);
+      // 🔁 AUTO CONTINUE
+      if (!result.trim().endsWith(".") && result.length > 400) {
+        try {
+          const more = await callModel(
+            model,
+            result + "\nContinue writing."
+          );
+          result += more;
+        } catch {}
+      }
+
+      // ✅ SAFE CACHE
+      if (result.length > 200 && result.endsWith(".")) {
+        cache.set(finalPrompt, result);
+      }
 
       return Response.json({
         result,
@@ -84,15 +103,12 @@ export async function POST(req) {
       });
     } catch (err) {
       lastError = err;
-      console.log(`Model failed: ${model}`);
     }
   }
 
-  // ❌ All failed
   return Response.json(
     {
-      result:
-        "All AI models failed. Please try again in a few seconds.",
+      result: "All AI models failed. Try again.",
       error: lastError?.message || "Unknown error",
     },
     { status: 500 }
